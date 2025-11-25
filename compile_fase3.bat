@@ -32,10 +32,16 @@ if errorlevel 1 goto error
 g++ -std=c++17 -Wall -O2 -c tac.cpp -o tac.o
 if errorlevel 1 goto error
 
+g++ -std=c++17 -Wall -O2 -c otimizador.cpp -o otimizador.o
+if errorlevel 1 goto error
+
+g++ -std=c++17 -Wall -O2 -c gerador_assembly.cpp -o gerador_assembly.o
+if errorlevel 1 goto error
+
 g++ -std=c++17 -Wall -O2 -c main.cpp -o main.o
 if errorlevel 1 goto error
 
-g++ -std=c++17 -Wall -O2 -o AnalisadorCompleto.exe main.o gramatica.o parser.o arvore.o leitor.o tabela_simbolos.o semantico_saida.o semantico_inferencia.o semantico_comandos.o semantico_driver.o tac.o
+g++ -std=c++17 -Wall -O2 -o AnalisadorCompleto.exe main.o gramatica.o parser.o arvore.o leitor.o tabela_simbolos.o semantico_saida.o semantico_inferencia.o semantico_comandos.o semantico_driver.o tac.o otimizador.o gerador_assembly.o
 if errorlevel 1 goto error
 
 echo.

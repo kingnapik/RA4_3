@@ -12,62 +12,50 @@
 
 using namespace std;
 
-// Estrutura para uma instrucao TAC
+// Estrutura simples para TAC
 struct InstrucaoTAC {
-    string op;       // operador: +, -, *, /, %, |, ^, =, <, >, <=, >=, ==, !=, :=, GOTO, IF_FALSE, LABEL, etc
-    string arg1;     // primeiro argumento
-    string arg2;     // segundo argumento (pode ser vazio)
-    string result;   // resultado (pode ser vazio para GOTO, LABEL, etc)
+    string op;       // Ex: "+", "IF_FALSE", "GOTO", ":="
+    string arg1;     // Ex: "t0", "A"
+    string arg2;     // Ex: "t1", "L1"
+    string result;   // Ex: "t2", "L2", "A"
     
     InstrucaoTAC(string o = "", string a1 = "", string a2 = "", string r = "") 
         : op(o), arg1(a1), arg2(a2), result(r) {}
 };
 
-// Classe para geracao de TAC
 class GeradorTAC {
 private:
-    vector<InstrucaoTAC> codigo;    // codigo TAC gerado
-    int contadorTemp;                // contador para temporarios (t0, t1, t2...)
-    int contadorLabel;               // contador para labels (L0, L1, L2...)
-    stack<string> pilhaOperandos;   // pilha para processar RPN
+    vector<InstrucaoTAC> codigo;
+    int contadorTemp;
+    int contadorLabel;
+    stack<string> pilhaOperandos;
     
-    // Funcoes auxiliares
-    string novoTemp();               // gera novo temporario
-    string novoLabel();              // gera novo label
-    void limparPilha();              // limpa pilha de operandos
+    // Auxiliares
+    string novoTemp();
+    string novoLabel();
+    void limparPilha();
     
-    // Processamento da arvore
+    // Transforma a recursao "CORPO -> E -> CORPO'" em uma lista plana
+    void linearizarCorpo(NoArvore* no, vector<NoArvore*>& lista);
+    
+    // Processamento
     void processar(NoArvore* no);
-    void processarExpressao(NoArvore* no);
+    void processarCorpo(NoArvore* no); // Aqui acontece a magica do IF/FOR
     void processarOperacao(NoArvore* no);
-    void processarLiteral(NoArvore* no);
-    void processarVariavel(NoArvore* no);
-    void processarMEM(NoArvore* no);
     void processarRES(NoArvore* no);
-    void processarIF(NoArvore* no);
-    void processarFOR(NoArvore* no);
-    void processarCorpo(NoArvore* no);
     
-    // Helpers para RPN
-    bool ehOperador(const string& simbolo);
     bool ehOperadorBinario(const string& op);
-    bool ehOperadorRelacional(const string& op);
-    string traduzirOperador(const string& op);
     
 public:
     GeradorTAC();
     
-    // Funcao principal
+    // Funcao principal (nome corrigido conforme pedido)
     void gerarTAC(NoArvore* arvoreAtribuida);
     
-    // Saida
     void imprimirTAC();
     void salvarTAC(const string& nomeArquivo);
-    vector<InstrucaoTAC> obterCodigo() const;
-    
-    // Utilitarios
     void limpar();
-    int tamanho() const;
+    vector<InstrucaoTAC> obterCodigo() const;
 };
 
 #endif

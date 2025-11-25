@@ -9,6 +9,8 @@
 #include "tabela_simbolos.h"
 #include "semantico.h"
 #include "tac.h"
+#include "otimizador.h"
+#include "gerador_assembly.h"
 #include <iostream>
 #include <utility>
 
@@ -136,27 +138,52 @@ int main(int argc, char* argv[]) {//verifica argumentos de entrada
         cout << "========================================" << endl;
         
         GeradorTAC geradorTAC;
+        vector<InstrucaoTAC> codigoCompleto; // Vetor para guardar TUDO
         
-        // Processar cada arvore valida
+        cout << "\n1. Gerando TAC para todas as arvores..." << endl;
+        
+        // Passo 1: Gerar e Acumular
         for (const auto& arvoreInfo : todasArvores) {
             NoArvore* arvore = arvoreInfo.first;
-            int numeroLinha = arvoreInfo.second;
-            
-            cout << "\nGerando TAC para linha " << numeroLinha << "..." << endl;
-            
-            // Gerar TAC para esta arvore
+
+            // Gera TAC desta linha (contadores tX e LX continuam incrementando)
             geradorTAC.gerarTAC(arvore);
-            
-            // Imprimir TAC no console
-            geradorTAC.imprimirTAC();
-            
-            // Salvar TAC em arquivo individual
-            string nomeArquivoTAC = "tac_linha_" + to_string(numeroLinha) + ".txt";
-            geradorTAC.salvarTAC(nomeArquivoTAC);
-            
-            // Limpar para proxima linha
-            geradorTAC.limpar();
         }
+
+        // Salvar o TAC Bruto por completo
+        cout << "Salvando TAC Bruto (todas as instrucoes)..." << endl;
+        geradorTAC.salvarTAC("tac_completo_original.txt");
+
+        // Passo 2: Otimizar tudo de uma vez
+        cout << "\n2. Executando Otimizacao Global..." << endl;
+        OtimizadorTAC otimizador;
+        
+        otimizador.carregarCodigo(geradorTAC.obterCodigo());
+        
+        // Otimiza
+        otimizador.otimizar();
+        
+        // Passo 3: Relatórios Finais
+        cout << "\n3. Salvando resultados finais..." << endl;
+        otimizador.imprimirRelatorio();
+        
+        otimizador.salvarRelatorio("relatorio_otimizacao_final.txt");
+        otimizador.salvarTACOtimizado("tac_final_otimizado.txt");
+
+        cout << "\n4. Gerando Assembly AVR (16-bit)..." << endl;
+        GeradorAssembly geradorASM;
+
+        // Usa o código otimizado (do vetor de TACs do otimizador)
+        // Nota: Precisamos adicionar um getter no otimizador ou usar o vetor original se não mudou muito
+        // Recomendo adicionar "vector<InstrucaoTAC> obterCodigo() const" no otimizador.h
+        geradorASM.gerarAssembly(otimizador.obterCodigo(), "codigo.S");
+        
+        cout << "\nProcesso concluido!" << endl;
+        cout << "Arquivos gerados:" << endl;
+        cout << "- tac_completo_original.txt" << endl;
+        cout << "- tac_completo_otimizado.txt" << endl;
+        cout << "- relatorio_otimizacao_global.txt" << endl;
+        cout << "- codigo_final.asm" << endl;
 
         // Limpa memoria de todas as derivacoes (que contem as arvores)
         for (auto deriv : todasDerivacoes) {
@@ -179,13 +206,15 @@ int main(int argc, char* argv[]) {//verifica argumentos de entrada
         cout << "\nArquivos gerados:" << endl;
         cout << "- analise_gramatica.md (gramatica, FIRST, FOLLOW, tabela LL(1) e todas as arvores)" << endl;
         cout << "- tabela_ll1.html (tabela LL(1) - visualizacao extra)" << endl;
-        cout << "- arvore_linha_N.html (todas as arvores - visualizacao extra)" << endl;
+        cout << "- arvore_linha_N.html (todas as arvores - visualizacao extra)\n" << endl;
         cout << "- gramatica_atributos.md (FASE 3 - regras semanticas)" << endl;
         cout << "- erros_semanticos.md (FASE 3 - erros encontrados)" << endl;
         cout << "- julgamento_tipos.md (FASE 3 - inferencia de tipos)" << endl;
         cout << "- arvore_atribuida_linha_N.md (FASE 3 - arvore atribuida Markdown)" << endl;
-        cout << "- arvore_atribuida_linha_N.json (FASE 3 - arvore atribuida JSON)" << endl;
-        cout << "- tac_linha_N.txt (FASE 4 - codigo de tres enderecos)" << endl;
+        cout << "- arvore_atribuida_linha_N.json (FASE 3 - arvore atribuida JSON)\n" << endl;
+        cout << "- tac_completo_original.txt (FASE 4 - TAC)" << endl;
+        cout << "- tac_completo_otimizado.txt (FASE 4 - TAC)" << endl;
+        cout << "- relatorio_otimizacao_global.txt (FASE 4 - TAC)\n" << endl;
         cout << "\nAbra os arquivos HTML no navegador para visualizacao grafica!" << endl;
 
     } catch (const exception& e) {

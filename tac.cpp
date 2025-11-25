@@ -5,7 +5,6 @@
 #include "tac.h"
 #include <iostream>
 #include <fstream>
-#include <sstream>
 #include <cctype>
 #include <algorithm>
 
@@ -25,401 +24,237 @@ void GeradorTAC::limparPilha() {
     }
 }
 
-bool GeradorTAC::ehOperador(const string& simbolo) {
-    return simbolo == "+" || simbolo == "-" || simbolo == "*" || simbolo == "/" ||
-           simbolo == "%" || simbolo == "|" || simbolo == "^" ||
-           simbolo == ">" || simbolo == "<" || simbolo == ">=" || 
-           simbolo == "<=" || simbolo == "==" || simbolo == "!=";
-}
-
-bool GeradorTAC::ehOperadorBinario(const string& op) {
-    return ehOperador(op);
-}
-
-bool GeradorTAC::ehOperadorRelacional(const string& op) {
-    return op == ">" || op == "<" || op == ">=" || 
-           op == "<=" || op == "==" || op == "!=";
-}
-
-string GeradorTAC::traduzirOperador(const string& op) {
-    // Operadores ja estao no formato correto
-    return op;
-}
-
+// Funcao principal chamada pela main
 void GeradorTAC::gerarTAC(NoArvore* arvoreAtribuida) {
     if (!arvoreAtribuida) return;
-    
     limpar();
     processar(arvoreAtribuida);
+}
+
+// Achata a arvore recursiva em uma lista sequencial
+void GeradorTAC::linearizarCorpo(NoArvore* no, vector<NoArvore*>& lista) {
+    if (!no) return;
+    
+    // Navega na estrutura: CORPO -> E ... CORPO'
+    for (auto filho : no->filhos) {
+        if (filho->simbolo == "E") {
+            lista.push_back(filho);
+        } else if (filho->simbolo == "CORPO" || filho->simbolo == "CORPO'") {
+            linearizarCorpo(filho, lista);
+        }
+    }
 }
 
 void GeradorTAC::processar(NoArvore* no) {
     if (!no) return;
     
-    // P -> ( CORPO )
-    if (no->simbolo == "P") {
-        if (no->filhos.size() >= 3) {
-            processar(no->filhos[1]); // processa CORPO
+    string sim = no->simbolo;
+    
+    if (sim == "P") {
+        // P -> ( CORPO )
+        // Procura o filho CORPO
+        for(auto f : no->filhos) {
+            if(f->simbolo == "CORPO") {
+                processar(f);
+                return;
+            }
         }
     }
-    // CORPO -> E CORPO'
-    else if (no->simbolo == "CORPO") {
+    else if (sim == "CORPO") {
         processarCorpo(no);
     }
-    // CORPO' -> E CORPO' | epsilon
-    else if (no->simbolo == "CORPO'") {
-        for (auto filho : no->filhos) {
-            processar(filho);
-        }
+    else if (sim == "E") {
+        if (!no->filhos.empty()) processar(no->filhos[0]);
     }
-    // E -> E_ARITMETICO | E_ESPECIAL | OP
-    else if (no->simbolo == "E") {
-        processarExpressao(no);
-    }
-    // E_ARITIMETICO -> num | P
-    else if (no->simbolo == "E_ARITIMETICO") {
+    // Tratamento de literais e variaveis
+    else if (sim == "E_ARITIMETICO" || sim == "E_ARITMETICO") { // Aceita ambas grafias
         if (!no->filhos.empty()) {
-            NoArvore* filho = no->filhos[0];
-            if (filho->simbolo == "P") {
-                processar(filho);
-            } else {
-                // Literal numerico
-                pilhaOperandos.push(filho->simbolo);
-            }
+            if (no->filhos[0]->simbolo == "P") processar(no->filhos[0]); // Recursao ( P )
+            else pilhaOperandos.push(no->filhos[0]->simbolo); // Numero
         }
     }
-    // E_ESPECIAL -> var | res | if | for
-    else if (no->simbolo == "E_ESPECIAL") {
+    else if (sim == "E_ESPECIAL") {
         if (!no->filhos.empty()) {
-            NoArvore* filho = no->filhos[0];
-            if (filho->simbolo == "RES") {
-                processarRES(no);
-            } else if (filho->simbolo == "IF") {
-                processarIF(no);
-            } else if (filho->simbolo == "FOR") {
-                processarFOR(no);
-            } else if (!filho->simbolo.empty() && isupper(filho->simbolo[0])) {
-                // Variavel
-                pilhaOperandos.push(filho->simbolo);
-            }
+            string val = no->filhos[0]->simbolo;
+            if (val == "RES") processarRES(no);
+            else if (val == "IF" || val == "FOR") { /* processado no corpo */ }
+            else if (isupper(val[0])) pilhaOperandos.push(val); // Variavel
         }
     }
-    // OP -> operadores
-    else if (no->simbolo == "OP") {
+    else if (sim == "OP") {
         processarOperacao(no);
     }
 }
 
-void GeradorTAC::processarExpressao(NoArvore* no) {
-    if (!no || no->filhos.empty()) return;
+void GeradorTAC::processarCorpo(NoArvore* no) {
+    // 1. Transformar a recursao em lista plana
+    vector<NoArvore*> elementos;
+    linearizarCorpo(no, elementos);
     
-    processar(no->filhos[0]);
+    if (elementos.empty()) return;
+
+    // O ultimo elemento define o comando especial em RPN (sufixo)
+    NoArvore* ultimo = elementos.back();
+    string comando = "";
+    
+    // Descobre o que é o ultimo elemento
+    if (!ultimo->filhos.empty() && !ultimo->filhos[0]->filhos.empty()) {
+         // Navega E -> E_ESPECIAL -> IF/FOR/VAR
+         if (ultimo->filhos[0]->simbolo == "E_ESPECIAL") {
+             comando = ultimo->filhos[0]->filhos[0]->simbolo;
+         }
+    }
+
+    // --- CASO 1: IF ---
+    // Padrao: (COND) (THEN) (ELSE) IF
+    if (comando == "IF" && elementos.size() >= 4) {
+        // Elementos anteriores sao blocos P -> ( CORPO )
+        NoArvore* condicao = elementos[elementos.size() - 4];
+        NoArvore* blocoThen = elementos[elementos.size() - 3];
+        NoArvore* blocoElse = elementos[elementos.size() - 2];
+        
+        string lblElse = novoLabel();
+        string lblFim = novoLabel();
+        
+        // 1. Gera condicao
+        processar(condicao);
+        string tCond = pilhaOperandos.top(); pilhaOperandos.pop();
+        
+        // 2. Salta se falso
+        codigo.push_back(InstrucaoTAC("IF_FALSE", tCond, "", lblElse));
+        
+        // 3. Bloco Then
+        processar(blocoThen);
+        codigo.push_back(InstrucaoTAC("GOTO", "", "", lblFim));
+        
+        // 4. Bloco Else
+        codigo.push_back(InstrucaoTAC("LABEL", "", "", lblElse));
+        processar(blocoElse);
+        
+        // 5. Fim
+        codigo.push_back(InstrucaoTAC("LABEL", "", "", lblFim));
+        return;
+    }
+
+    // --- CASO 2: FOR ---
+    // Padrao: (COND) (BODY) FOR
+    if (comando == "FOR" && elementos.size() >= 3) {
+        NoArvore* condicao = elementos[elementos.size() - 3];
+        NoArvore* corpoLoop = elementos[elementos.size() - 2];
+        
+        string lblInicio = novoLabel();
+        string lblFim = novoLabel();
+        
+        // 1. Label inicio
+        codigo.push_back(InstrucaoTAC("LABEL", "", "", lblInicio));
+        
+        // 2. Condicao
+        processar(condicao);
+        string tCond = pilhaOperandos.top(); pilhaOperandos.pop();
+        
+        // 3. Sai se falso
+        codigo.push_back(InstrucaoTAC("IF_FALSE", tCond, "", lblFim));
+        
+        // 4. Corpo
+        processar(corpoLoop);
+        
+        // 5. Volta
+        codigo.push_back(InstrucaoTAC("GOTO", "", "", lblInicio));
+        
+        // 6. Fim
+        codigo.push_back(InstrucaoTAC("LABEL", "", "", lblFim));
+        return;
+    }
+    
+    // --- CASO 3: MEM (Atribuicao) ---
+    // Padrao: ( EXPRESSAO ) VARIAVEL
+    // O ultimo elemento é uma Variavel e temos apenas 2 itens
+    if (elementos.size() == 2 && comando != "IF" && comando != "FOR" && comando != "RES") {
+        // Verifica se é variavel (letra maiuscula)
+        if (!comando.empty() && isupper(comando[0])) {
+            processar(elementos[0]); // Calcula valor
+            string valor = pilhaOperandos.top(); pilhaOperandos.pop();
+            
+            // Gera: A = valor
+            codigo.push_back(InstrucaoTAC(":=", valor, "", comando));
+            return;
+        }
+    }
+
+    // --- CASO 4: Sequencia Normal ---
+    // Se nao for especial, processa um por um (ex: calculos matematicos)
+    for (auto elem : elementos) {
+        processar(elem);
+    }
 }
 
 void GeradorTAC::processarOperacao(NoArvore* no) {
-    if (!no || no->filhos.empty()) return;
-    
     string op = no->filhos[0]->simbolo;
     
-    if (ehOperadorBinario(op)) {
-        // Operacao binaria em RPN: pop dois operandos, push resultado
-        if (pilhaOperandos.size() >= 2) {
-            string op2 = pilhaOperandos.top(); pilhaOperandos.pop();
-            string op1 = pilhaOperandos.top(); pilhaOperandos.pop();
-            
-            string temp = novoTemp();
-            codigo.push_back(InstrucaoTAC(op, op1, op2, temp));
-            pilhaOperandos.push(temp);
-        }
+    if (ehOperadorBinario(op) && pilhaOperandos.size() >= 2) {
+        string b = pilhaOperandos.top(); pilhaOperandos.pop(); // Inverte ordem na pilha
+        string a = pilhaOperandos.top(); pilhaOperandos.pop();
+        
+        string t = novoTemp();
+        codigo.push_back(InstrucaoTAC(op, a, b, t));
+        pilhaOperandos.push(t);
     }
-}
-
-void GeradorTAC::processarCorpo(NoArvore* no) {
-    if (!no) return;
-    
-    // Detectar padroes especiais: MEM, IF, FOR
-    
-    // Padrao MEM: valor variavel (sem operador depois)
-    if (no->filhos.size() >= 2) {
-        NoArvore* primeiroE = no->filhos[0];
-        NoArvore* corpoLinha = no->filhos[1];
-        
-        // Verificar se e MEM (valor var)
-        bool ehMEM = false;
-        string nomeVar = "";
-        
-        if (corpoLinha && corpoLinha->filhos.size() >= 1) {
-            NoArvore* segundoE = corpoLinha->filhos[0];
-            
-            // Verificar se nao ha mais operacoes depois
-            bool temMaisOperacoes = false;
-            if (corpoLinha->filhos.size() >= 2 && 
-                !corpoLinha->filhos[1]->filhos.empty()) {
-                NoArvore* possivelOp = corpoLinha->filhos[1]->filhos[0];
-                if (possivelOp && possivelOp->simbolo == "E" &&
-                    !possivelOp->filhos.empty() &&
-                    possivelOp->filhos[0]->simbolo == "OP") {
-                    temMaisOperacoes = true;
-                }
-            }
-            
-            if (!temMaisOperacoes && segundoE && segundoE->simbolo == "E" &&
-                !segundoE->filhos.empty() &&
-                segundoE->filhos[0]->simbolo == "E_ESPECIAL" &&
-                !segundoE->filhos[0]->filhos.empty()) {
-                
-                NoArvore* varNode = segundoE->filhos[0]->filhos[0];
-                if (!varNode->simbolo.empty() && isupper(varNode->simbolo[0])) {
-                    ehMEM = true;
-                    nomeVar = varNode->simbolo;
-                }
-            }
-        }
-        
-        if (ehMEM) {
-            // Processar valor
-            processar(primeiroE);
-            if (!pilhaOperandos.empty()) {
-                string valor = pilhaOperandos.top();
-                pilhaOperandos.pop();
-                // Gerar atribuicao
-                codigo.push_back(InstrucaoTAC(":=", valor, "", nomeVar));
-            }
-            return;
-        }
-        
-        // Verificar IF/FOR em RPN
-        if (corpoLinha && corpoLinha->filhos.size() >= 2) {
-            //NoArvore* ultimoE = nullptr;
-            for (int i = corpoLinha->filhos.size() - 1; i >= 0; i--) {
-                NoArvore* elem = corpoLinha->filhos[i];
-                if (elem && elem->simbolo == "E" &&
-                    !elem->filhos.empty() &&
-                    elem->filhos[0]->simbolo == "E_ESPECIAL" &&
-                    !elem->filhos[0]->filhos.empty()) {
-                    
-                    string marcador = elem->filhos[0]->filhos[0]->simbolo;
-                    
-                    if (marcador == "IF") {
-                        // Padrao IF: cond then else IF
-                        processar(primeiroE); // condicao
-                        string cond = "";
-                        if (!pilhaOperandos.empty()) {
-                            cond = pilhaOperandos.top();
-                            pilhaOperandos.pop();
-                        }
-                        
-                        string labelElse = novoLabel();
-                        string labelFim = novoLabel();
-                        
-                        // IF_FALSE cond GOTO labelElse
-                        codigo.push_back(InstrucaoTAC("IF_FALSE", cond, "", labelElse));
-                        
-                        // Processar bloco then (primeiro elemento de corpo')
-                        if (corpoLinha->filhos.size() > 0) {
-                            processar(corpoLinha->filhos[0]);
-                        }
-                        
-                        // GOTO labelFim
-                        codigo.push_back(InstrucaoTAC("GOTO", "", "", labelFim));
-                        
-                        // LABEL labelElse
-                        codigo.push_back(InstrucaoTAC("LABEL", "", "", labelElse));
-                        
-                        // Processar bloco else (segundo elemento antes do IF)
-                        for (int j = 1; j < i; j++) {
-                            if (corpoLinha->filhos[j]->simbolo == "E") {
-                                processar(corpoLinha->filhos[j]);
-                                break;
-                            }
-                        }
-                        
-                        // LABEL labelFim
-                        codigo.push_back(InstrucaoTAC("LABEL", "", "", labelFim));
-                        return;
-                    }
-                    
-                    if (marcador == "FOR") {
-                        // Padrao FOR: inicio fim corpo FOR
-                        processar(primeiroE); // inicio
-                        string inicio = "";
-                        if (!pilhaOperandos.empty()) {
-                            inicio = pilhaOperandos.top();
-                            pilhaOperandos.pop();
-                        }
-                        
-                        if (corpoLinha->filhos.size() > 0) {
-                            processar(corpoLinha->filhos[0]); // fim
-                        }
-                        string fim = "";
-                        if (!pilhaOperandos.empty()) {
-                            fim = pilhaOperandos.top();
-                            pilhaOperandos.pop();
-                        }
-                        
-                        string labelLoop = novoLabel();
-                        string labelFim = novoLabel();
-                        string contador = novoTemp();
-                        
-                        // contador = inicio
-                        codigo.push_back(InstrucaoTAC(":=", inicio, "", contador));
-                        
-                        // LABEL labelLoop
-                        codigo.push_back(InstrucaoTAC("LABEL", "", "", labelLoop));
-                        
-                        // t = contador <= fim
-                        string tempCond = novoTemp();
-                        codigo.push_back(InstrucaoTAC("<=", contador, fim, tempCond));
-                        
-                        // IF_FALSE t GOTO labelFim
-                        codigo.push_back(InstrucaoTAC("IF_FALSE", tempCond, "", labelFim));
-                        
-                        // Processar corpo do loop
-                        for (int j = 1; j < i; j++) {
-                            if (corpoLinha->filhos[j]->simbolo == "E") {
-                                processar(corpoLinha->filhos[j]);
-                                break;
-                            }
-                        }
-                        
-                        // contador = contador + 1
-                        string tempInc = novoTemp();
-                        codigo.push_back(InstrucaoTAC("+", contador, "1", tempInc));
-                        codigo.push_back(InstrucaoTAC(":=", tempInc, "", contador));
-                        
-                        // GOTO labelLoop
-                        codigo.push_back(InstrucaoTAC("GOTO", "", "", labelLoop));
-                        
-                        // LABEL labelFim
-                        codigo.push_back(InstrucaoTAC("LABEL", "", "", labelFim));
-                        return;
-                    }
-                }
-            }
-        }
-        
-        // Processamento normal de expressoes binarias
-        processar(primeiroE);
-        if (corpoLinha) {
-            for (auto filho : corpoLinha->filhos) {
-                processar(filho);
-            }
-        }
-    }
-}
-
-void GeradorTAC::processarMEM(NoArvore* no) {
-    // Implementado em processarCorpo
 }
 
 void GeradorTAC::processarRES(NoArvore* no) {
-    // RES N - referencia resultado de N linhas atras
-    string temp = novoTemp();
-    codigo.push_back(InstrucaoTAC("RES", "N", "", temp));
-    pilhaOperandos.push(temp);
+    // RES funciona como uma funcao: pega argumento da pilha
+    string arg = "1";
+    if (!pilhaOperandos.empty()) {
+        arg = pilhaOperandos.top(); pilhaOperandos.pop();
+    }
+    
+    string t = novoTemp();
+    // Gera: tX = RES(arg)
+    codigo.push_back(InstrucaoTAC("RES", arg, "", t));
+    pilhaOperandos.push(t);
 }
 
-void GeradorTAC::processarIF(NoArvore* no) {
-    // Implementado em processarCorpo
-}
-
-void GeradorTAC::processarFOR(NoArvore* no) {
-    // Implementado em processarCorpo
+bool GeradorTAC::ehOperadorBinario(const string& op) {
+    return op == "+" || op == "-" || op == "*" || op == "/" || op == "%" || op == "^" || op == "|" || // Aritméticos 
+           op == ">" || op == "<" || op == ">=" || op == "<=" || op == "==" || op == "!="; // Relacionais
 }
 
 void GeradorTAC::imprimirTAC() {
-    cout << "\n=== CODIGO DE TRES ENDERECOS (TAC) ===" << endl;
-    cout << "---------------------------------------" << endl;
-    
+    cout << "\n=== TAC ===" << endl;
     for (size_t i = 0; i < codigo.size(); i++) {
-        const InstrucaoTAC& inst = codigo[i];
-        
+        const auto& inst = codigo[i];
         cout << i << ": ";
-        
-        if (inst.op == ":=") {
-            cout << inst.result << " = " << inst.arg1;
-        }
-        else if (inst.op == "LABEL") {
-            cout << inst.result << ":";
-        }
-        else if (inst.op == "GOTO") {
-            cout << "GOTO " << inst.result;
-        }
-        else if (inst.op == "IF_FALSE") {
-            cout << "IF_FALSE " << inst.arg1 << " GOTO " << inst.result;
-        }
-        else if (inst.op == "RES") {
-            cout << inst.result << " = RES(" << inst.arg1 << ")";
-        }
-        else if (ehOperadorBinario(inst.op)) {
-            cout << inst.result << " = " << inst.arg1 << " " << inst.op << " " << inst.arg2;
-        }
-        else {
-            cout << inst.op << " " << inst.arg1 << " " << inst.arg2 << " " << inst.result;
-        }
-        
+        if (inst.op == "LABEL") cout << inst.result << ":";
+        else if (inst.op == "GOTO") cout << "GOTO " << inst.result;
+        else if (inst.op == "IF_FALSE") cout << "IF_FALSE " << inst.arg1 << " GOTO " << inst.result;
+        else if (inst.op == ":=") cout << inst.result << " = " << inst.arg1;
+        else if (inst.op == "RES") cout << inst.result << " = RES(" << inst.arg1 << ")";
+        else cout << inst.result << " = " << inst.arg1 << " " << inst.op << " " << inst.arg2;
         cout << endl;
     }
-    
-    cout << "---------------------------------------" << endl;
-    cout << "Total de instrucoes: " << codigo.size() << endl;
 }
 
 void GeradorTAC::salvarTAC(const string& nomeArquivo) {
     ofstream file(nomeArquivo);
-    if (!file.is_open()) {
-        cerr << "Erro ao criar arquivo: " << nomeArquivo << endl;
-        return;
-    }
-    
-    file << "# CODIGO DE TRES ENDERECOS (TAC)\n";
-    file << "# Gerado pelo compilador RPN\n\n";
-    
     for (size_t i = 0; i < codigo.size(); i++) {
-        const InstrucaoTAC& inst = codigo[i];
-        
+        const auto& inst = codigo[i];
         file << i << ": ";
-        
-        if (inst.op == ":=") {
-            file << inst.result << " = " << inst.arg1;
-        }
-        else if (inst.op == "LABEL") {
-            file << inst.result << ":";
-        }
-        else if (inst.op == "GOTO") {
-            file << "GOTO " << inst.result;
-        }
-        else if (inst.op == "IF_FALSE") {
-            file << "IF_FALSE " << inst.arg1 << " GOTO " << inst.result;
-        }
-        else if (inst.op == "RES") {
-            file << inst.result << " = RES(" << inst.arg1 << ")";
-        }
-        else if (ehOperadorBinario(inst.op)) {
-            file << inst.result << " = " << inst.arg1 << " " << inst.op << " " << inst.arg2;
-        }
-        else {
-            file << inst.op << " " << inst.arg1 << " " << inst.arg2 << " " << inst.result;
-        }
-        
-        file << "\n";
+        if (inst.op == "LABEL") file << inst.result << ":";
+        else if (inst.op == "GOTO") file << "GOTO " << inst.result;
+        else if (inst.op == "IF_FALSE") file << "IF_FALSE " << inst.arg1 << " GOTO " << inst.result;
+        else if (inst.op == ":=") file << inst.result << " = " << inst.arg1;
+        else if (inst.op == "RES") file << inst.result << " = RES(" << inst.arg1 << ")";
+        else file << inst.result << " = " << inst.arg1 << " " << inst.op << " " << inst.arg2;
+        file << endl;
     }
-    
     file.close();
-    cout << "Codigo TAC salvo em: " << nomeArquivo << endl;
-}
-
-vector<InstrucaoTAC> GeradorTAC::obterCodigo() const {
-    return codigo;
 }
 
 void GeradorTAC::limpar() {
     codigo.clear();
-    contadorTemp = 0;
-    contadorLabel = 0;
     limparPilha();
 }
 
-int GeradorTAC::tamanho() const {
-    return codigo.size();
+vector<InstrucaoTAC> GeradorTAC::obterCodigo() const {
+    return codigo;
 }
