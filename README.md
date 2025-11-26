@@ -6,6 +6,8 @@
 
 **Disciplina:** Linguagens Formais e Compiladores
 
+**Professor:** Frank Coelho de Alcantara
+
 ---
 
 ## Descricao
