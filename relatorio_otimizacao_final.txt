@@ -1,0 +1,2 @@
+=== RELATORIO DE OTIMIZACAO ===
+--- Inicio da Passada 1 ---

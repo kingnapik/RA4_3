@@ -89,16 +89,12 @@ P
   CORPO
     E
       E_ARITIMETICO
-        10 (terminal)
+        0.5 (terminal)
     CORPO'
       E
-        E_ARITIMETICO
-          5 (terminal)
+        E_ESPECIAL
+          X (terminal)
       CORPO'
-        E
-          OP
-            + (terminal)
-        CORPO'
   ) (terminal)
 ```
 
@@ -110,16 +106,68 @@ P
   CORPO
     E
       E_ARITIMETICO
-        20.1 (terminal)
+        P
+          ( (terminal)
+          CORPO
+            E
+              E_ESPECIAL
+                X (terminal)
+            CORPO'
+              E
+                E_ARITIMETICO
+                  0.0 (terminal)
+              CORPO'
+                E
+                  OP
+                    < (terminal)
+                CORPO'
+          ) (terminal)
     CORPO'
       E
         E_ARITIMETICO
-          4 (terminal)
+          P
+            ( (terminal)
+            CORPO
+              E
+                E_ARITIMETICO
+                  P
+                    ( (terminal)
+                    CORPO
+                      E
+                        E_ARITIMETICO
+                          0.0 (terminal)
+                      CORPO'
+                        E
+                          E_ESPECIAL
+                            X (terminal)
+                        CORPO'
+                          E
+                            OP
+                              - (terminal)
+                          CORPO'
+                    ) (terminal)
+              CORPO'
+                E
+                  E_ESPECIAL
+                    X (terminal)
+                CORPO'
+            ) (terminal)
       CORPO'
         E
-          OP
-            - (terminal)
+          E_ARITIMETICO
+            P
+              ( (terminal)
+              CORPO
+                E
+                  E_ARITIMETICO
+                    0.0 (terminal)
+                CORPO'
+              ) (terminal)
         CORPO'
+          E
+            E_ESPECIAL
+              IF (terminal)
+          CORPO'
   ) (terminal)
 ```
 
@@ -131,16 +179,12 @@ P
   CORPO
     E
       E_ARITIMETICO
-        7 (terminal)
+        1.0 (terminal)
     CORPO'
       E
-        E_ARITIMETICO
-          3 (terminal)
+        E_ESPECIAL
+          R (terminal)
       CORPO'
-        E
-          OP
-            * (terminal)
-        CORPO'
   ) (terminal)
 ```
 
@@ -152,16 +196,27 @@ P
   CORPO
     E
       E_ARITIMETICO
-        15 (terminal)
+        P
+          ( (terminal)
+          CORPO
+            E
+              E_ESPECIAL
+                X (terminal)
+            CORPO'
+              E
+                E_ARITIMETICO
+                  2 (terminal)
+              CORPO'
+                E
+                  OP
+                    ^ (terminal)
+                CORPO'
+          ) (terminal)
     CORPO'
       E
-        E_ARITIMETICO
-          3 (terminal)
+        E_ESPECIAL
+          N2 (terminal)
       CORPO'
-        E
-          OP
-            / (terminal)
-        CORPO'
   ) (terminal)
 ```
 
@@ -173,16 +228,27 @@ P
   CORPO
     E
       E_ARITIMETICO
-        22 (terminal)
+        P
+          ( (terminal)
+          CORPO
+            E
+              E_ESPECIAL
+                N2 (terminal)
+            CORPO'
+              E
+                E_ARITIMETICO
+                  2.0 (terminal)
+              CORPO'
+                E
+                  OP
+                    | (terminal)
+                CORPO'
+          ) (terminal)
     CORPO'
       E
-        E_ARITIMETICO
-          7 (terminal)
+        E_ESPECIAL
+          T2 (terminal)
       CORPO'
-        E
-          OP
-            % (terminal)
-        CORPO'
   ) (terminal)
 ```
 
@@ -194,16 +260,27 @@ P
   CORPO
     E
       E_ARITIMETICO
-        2 (terminal)
+        P
+          ( (terminal)
+          CORPO
+            E
+              E_ESPECIAL
+                R (terminal)
+            CORPO'
+              E
+                E_ESPECIAL
+                  T2 (terminal)
+              CORPO'
+                E
+                  OP
+                    - (terminal)
+                CORPO'
+          ) (terminal)
     CORPO'
       E
-        E_ARITIMETICO
-          8.1 (terminal)
+        E_ESPECIAL
+          R (terminal)
       CORPO'
-        E
-          OP
-            ^ (terminal)
-        CORPO'
   ) (terminal)
 ```
 
@@ -215,16 +292,27 @@ P
   CORPO
     E
       E_ARITIMETICO
-        100 (terminal)
+        P
+          ( (terminal)
+          CORPO
+            E
+              E_ESPECIAL
+                X (terminal)
+            CORPO'
+              E
+                E_ARITIMETICO
+                  4 (terminal)
+              CORPO'
+                E
+                  OP
+                    ^ (terminal)
+                CORPO'
+          ) (terminal)
     CORPO'
       E
-        E_ARITIMETICO
-          25 (terminal)
+        E_ESPECIAL
+          N4 (terminal)
       CORPO'
-        E
-          OP
-            | (terminal)
-        CORPO'
   ) (terminal)
 ```
 
@@ -236,11 +324,26 @@ P
   CORPO
     E
       E_ARITIMETICO
-        50 (terminal)
+        P
+          ( (terminal)
+          CORPO
+            E
+              E_ESPECIAL
+                N4 (terminal)
+            CORPO'
+              E
+                E_ARITIMETICO
+                  24.0 (terminal)
+              CORPO'
+                E
+                  OP
+                    | (terminal)
+                CORPO'
+          ) (terminal)
     CORPO'
       E
         E_ESPECIAL
-          A (terminal)
+          T4 (terminal)
       CORPO'
   ) (terminal)
 ```
@@ -252,17 +355,28 @@ P
   ( (terminal)
   CORPO
     E
-      E_ESPECIAL
-        A (terminal)
+      E_ARITIMETICO
+        P
+          ( (terminal)
+          CORPO
+            E
+              E_ESPECIAL
+                R (terminal)
+            CORPO'
+              E
+                E_ESPECIAL
+                  T4 (terminal)
+              CORPO'
+                E
+                  OP
+                    + (terminal)
+                CORPO'
+          ) (terminal)
     CORPO'
       E
-        E_ARITIMETICO
-          10 (terminal)
+        E_ESPECIAL
+          R (terminal)
       CORPO'
-        E
-          OP
-            > (terminal)
-        CORPO'
   ) (terminal)
 ```
 
@@ -279,52 +393,22 @@ P
           CORPO
             E
               E_ESPECIAL
-                A (terminal)
+                X (terminal)
             CORPO'
               E
                 E_ARITIMETICO
-                  10 (terminal)
+                  6 (terminal)
               CORPO'
                 E
                   OP
-                    > (terminal)
+                    ^ (terminal)
                 CORPO'
           ) (terminal)
     CORPO'
       E
-        E_ARITIMETICO
-          P
-            ( (terminal)
-            CORPO
-              E
-                E_ESPECIAL
-                  A (terminal)
-              CORPO'
-                E
-                  E_ARITIMETICO
-                    2 (terminal)
-                CORPO'
-                  E
-                    OP
-                      * (terminal)
-                  CORPO'
-            ) (terminal)
+        E_ESPECIAL
+          N6 (terminal)
       CORPO'
-        E
-          E_ARITIMETICO
-            P
-              ( (terminal)
-              CORPO
-                E
-                  E_ARITIMETICO
-                    0 (terminal)
-                CORPO'
-              ) (terminal)
-        CORPO'
-          E
-            E_ESPECIAL
-              IF (terminal)
-          CORPO'
   ) (terminal)
 ```
 
@@ -336,11 +420,26 @@ P
   CORPO
     E
       E_ARITIMETICO
-        1 (terminal)
+        P
+          ( (terminal)
+          CORPO
+            E
+              E_ESPECIAL
+                N6 (terminal)
+            CORPO'
+              E
+                E_ARITIMETICO
+                  720.0 (terminal)
+              CORPO'
+                E
+                  OP
+                    | (terminal)
+                CORPO'
+          ) (terminal)
     CORPO'
       E
         E_ESPECIAL
-          RES (terminal)
+          T6 (terminal)
       CORPO'
   ) (terminal)
 ```
@@ -357,201 +456,23 @@ P
           ( (terminal)
           CORPO
             E
-              E_ARITIMETICO
-                100 (terminal)
-            CORPO'
-              E
-                E_ESPECIAL
-                  C (terminal)
-              CORPO'
-                E
-                  OP
-                    > (terminal)
-                CORPO'
-          ) (terminal)
-    CORPO'
-      E
-        E_ARITIMETICO
-          P
-            ( (terminal)
-            CORPO
-              E
-                E_ARITIMETICO
-                  4 (terminal)
-              CORPO'
-                E
-                  E_ARITIMETICO
-                    4 (terminal)
-                CORPO'
-                  E
-                    OP
-                      * (terminal)
-                  CORPO'
-            ) (terminal)
-      CORPO'
-        E
-          E_ESPECIAL
-            FOR (terminal)
-        CORPO'
-  ) (terminal)
-```
-
-## Arvore Sintatica - Linha 13
-
-```
-P
-  ( (terminal)
-  CORPO
-    E
-      E_ARITIMETICO
-        P
-          ( (terminal)
-          CORPO
-            E
-              E_ARITIMETICO
-                8 (terminal)
-            CORPO'
-              E
-                E_ARITIMETICO
-                  4 (terminal)
-              CORPO'
-                E
-                  OP
-                    + (terminal)
-                CORPO'
-          ) (terminal)
-    CORPO'
-      E
-        E_ARITIMETICO
-          P
-            ( (terminal)
-            CORPO
-              E
-                E_ARITIMETICO
-                  3 (terminal)
-              CORPO'
-                E
-                  E_ARITIMETICO
-                    2 (terminal)
-                CORPO'
-                  E
-                    OP
-                      * (terminal)
-                  CORPO'
-            ) (terminal)
-      CORPO'
-        E
-          OP
-            - (terminal)
-        CORPO'
-  ) (terminal)
-```
-
-## Arvore Sintatica - Linha 14
-
-```
-P
-  ( (terminal)
-  CORPO
-    E
-      E_ARITIMETICO
-        100 (terminal)
-    CORPO'
-      E
-        E_ESPECIAL
-          B (terminal)
-      CORPO'
-  ) (terminal)
-```
-
-## Arvore Sintatica - Linha 15
-
-```
-P
-  ( (terminal)
-  CORPO
-    E
-      E_ESPECIAL
-        B (terminal)
-    CORPO'
-      E
-        E_ESPECIAL
-          A (terminal)
-      CORPO'
-        E
-          OP
-            < (terminal)
-        CORPO'
-  ) (terminal)
-```
-
-## Arvore Sintatica - Linha 16
-
-```
-P
-  ( (terminal)
-  CORPO
-    E
-      E_ARITIMETICO
-        P
-          ( (terminal)
-          CORPO
-            E
               E_ESPECIAL
-                B (terminal)
+                R (terminal)
             CORPO'
               E
                 E_ESPECIAL
-                  A (terminal)
+                  T6 (terminal)
               CORPO'
                 E
                   OP
-                    < (terminal)
+                    - (terminal)
                 CORPO'
           ) (terminal)
     CORPO'
       E
-        E_ARITIMETICO
-          P
-            ( (terminal)
-            CORPO
-              E
-                E_ESPECIAL
-                  B (terminal)
-              CORPO'
-                E
-                  E_ESPECIAL
-                    A (terminal)
-                CORPO'
-                  E
-                    OP
-                      + (terminal)
-                  CORPO'
-            ) (terminal)
+        E_ESPECIAL
+          R (terminal)
       CORPO'
-        E
-          E_ARITIMETICO
-            P
-              ( (terminal)
-              CORPO
-                E
-                  E_ESPECIAL
-                    B (terminal)
-                CORPO'
-                  E
-                    E_ESPECIAL
-                      A (terminal)
-                  CORPO'
-                    E
-                      OP
-                        - (terminal)
-                    CORPO'
-              ) (terminal)
-        CORPO'
-          E
-            E_ESPECIAL
-              IF (terminal)
-          CORPO'
   ) (terminal)
 ```
 

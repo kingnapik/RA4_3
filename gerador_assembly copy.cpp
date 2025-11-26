@@ -18,7 +18,7 @@ uint16_t GeradorAssembly::floatToHalf(float value) {
     std::memcpy(&bits, &value, sizeof(float));
 
     uint32_t sign = (bits >> 31) & 0x1;
-    int32_t exp   = (int32_t)((bits >> 23) & 0xFF) - 127;  // expoente com viés removido
+    int32_t exp   = (int32_t)((bits >> 23) & 0xFF) - 127;  // expoente com viÃ©s removido
     uint32_t mant = bits & 0x7FFFFF;                       // 23 bits
 
     // Zero, subnormais e underflow: vira 0 com mesmo sinal
@@ -52,7 +52,7 @@ static string hex8(uint8_t val) {
     return ss.str();
 }
 
-// --- EMISSORES BÁSICOS ---
+// --- EMISSORES BÃSICOS ---
 
 void GeradorAssembly::emit(string inst, string args, string comment) {
     stringstream ss;
@@ -72,7 +72,7 @@ void GeradorAssembly::coletarVariaveis(const vector<InstrucaoTAC>& codigoTAC) {
         auto check = [&](const string& s) {
             if (s.empty()) return;
             if (isdigit(static_cast<unsigned char>(s[0])) || s[0] == '-') return;
-            // Ignora rótulos em LABEL/GOTO/IF_FALSE
+            // Ignora rÃ³tulos em LABEL/GOTO/IF_FALSE
             if (inst.op == "LABEL" || inst.op == "GOTO" || inst.op == "IF_FALSE") return;
             variaveisGlobais.insert(s);
         };
@@ -89,7 +89,7 @@ void GeradorAssembly::gerarAssembly(const vector<InstrucaoTAC>& codigoTAC,
     coletarVariaveis(codigoTAC);
 
     // ---------------------------------------------------------------------
-    // 1. Cabeçalho
+    // 1. CabeÃ§alho
     // ---------------------------------------------------------------------
     assembly.push_back("; --- CODIGO AVR ASSEMBLY GERADO ---");
     assembly.push_back("#define __SFR_OFFSET 0");
@@ -101,13 +101,13 @@ void GeradorAssembly::gerarAssembly(const vector<InstrucaoTAC>& codigoTAC,
     assembly.push_back("#define temp2 r17");
     assembly.push_back("");
 
-    // Exporta símbolos de entrada
-    assembly.push_back(".global main");      // para bare-metal
-    assembly.push_back(".global _Z5setupv"); // void setup()
-    assembly.push_back(".global _Z4loopv");  // void loop()
+    // Exporta sÃ­mbolos de entrada
+    //assembly.push_back(".global main");      // para bare-metal
+    assembly.push_back(".global setup"); // void setup()
+    assembly.push_back(".global loop");  // void loop()
 
     // ---------------------------------------------------------------------
-    // 2. Área de dados (.data) – variáveis em RAM
+    // 2. Ãrea de dados (.data) â€“ variÃ¡veis em RAM
     // ---------------------------------------------------------------------
     assembly.push_back(".section .data");
     for (const string& var : variaveisGlobais) {
@@ -115,7 +115,7 @@ void GeradorAssembly::gerarAssembly(const vector<InstrucaoTAC>& codigoTAC,
     }
 
     // ---------------------------------------------------------------------
-    // 3. Área de código (.text) + strings em Flash
+    // 3. Ãrea de cÃ³digo (.text) + strings em Flash
     // ---------------------------------------------------------------------
     assembly.push_back("");
     assembly.push_back(".section .text");
@@ -127,21 +127,28 @@ void GeradorAssembly::gerarAssembly(const vector<InstrucaoTAC>& codigoTAC,
     assembly.push_back("str_newline: .asciz \"\\r\\n\"");
 
     // ---------------------------------------------------------------------
-    // 4. main – prólogo e inicialização
+    // 4. main â€“ prÃ³logo e inicializaÃ§Ã£o
     // ---------------------------------------------------------------------
     assembly.push_back("");
 
-    // setup() do Arduino: símbolo mangled _Z5setupv
-    emitLabel("_Z5setupv");
-    emit("rjmp", "main");
+    // loop() do Arduino: não faz nada (código roda uma vez no setup)
+    emitLabel("loop");
+    emit("ret", "");
 
-    // loop() do Arduino: símbolo mangled _Z4loopv, laço infinito
-    emitLabel("_Z4loopv");
-    emit("rjmp", "_Z4loopv");
-
-    // main "real" do seu código (para bare-metal ou para ser chamado por setup)
+    // setup() do Arduino: contém todo o código
     assembly.push_back("");
-    emitLabel("main");
+    emitLabel("setup");
+    // setup() do Arduino: sÃ­mbolo mangled _Z5setupv
+    //emitLabel("_Z5setupv");
+    //emit("rjmp", "main");
+
+    // loop() do Arduino: sÃ­mbolo mangled _Z4loopv, laÃ§o infinito
+    //emitLabel("_Z4loopv");
+    //emit("rjmp", "_Z4loopv");
+
+    // main "real" do seu cÃ³digo (para bare-metal ou para ser chamado por setup)
+    //assembly.push_back("");
+    //emitLabel("main");
 
     // Stack pointer
     emit("ldi", "temp, lo8(RAMEND)");
@@ -154,13 +161,13 @@ void GeradorAssembly::gerarAssembly(const vector<InstrucaoTAC>& codigoTAC,
     assembly.push_back("");
 
     // ---------------------------------------------------------------------
-    // 5. Tradução TAC -> ASM
+    // 5. TraduÃ§Ã£o TAC -> ASM
     // ---------------------------------------------------------------------
     for (const auto& inst : codigoTAC) {
         assembly.push_back("; " + inst.result + " = " +
                            inst.arg1 + " " + inst.op + " " + inst.arg2);
 
-        // Rótulo
+        // RÃ³tulo
         if (inst.op == "LABEL") {
             emitLabel(inst.result);
             continue;
@@ -174,14 +181,26 @@ void GeradorAssembly::gerarAssembly(const vector<InstrucaoTAC>& codigoTAC,
 
         // IF_FALSE t  goto Lx
         if (inst.op == "IF_FALSE") {
+            static int ifCounter = 0;
+            string lblSkip = "IF_SKIP_" + to_string(ifCounter++);
+
+            // carrega tCond em r24:r25
             emit("lds", "r24, " + inst.arg1);
             emit("lds", "r25, " + inst.arg1 + "+1");
             emit("or",  "r24, r25");
-            emit("breq", inst.result);
+
+            // se diferente de zero, pula o rjmp (branch curto, sempre perto)
+            emit("brne", lblSkip);
+
+            // se zero, faz o salto longo
+            emit("rjmp", inst.result);
+
+            // label local logo depois, sempre dentro do alcance do brne
+            emitLabel(lblSkip);
             continue;
         }
 
-        // Atribuição simples: x := y ou x := literal
+        // AtribuiÃ§Ã£o simples: x := y ou x := literal
         if (inst.op == ":=") {
             bool literal = false;
             if (!inst.arg1.empty()) {
@@ -191,10 +210,20 @@ void GeradorAssembly::gerarAssembly(const vector<InstrucaoTAC>& codigoTAC,
             }
 
             if (literal) {
-                float f = std::stof(inst.arg1);
-                uint16_t hf = floatToHalf(f);
-                emit("ldi", "r24, " + hex8(static_cast<uint8_t>(hf & 0xFF)));
-                emit("ldi", "r25, " + hex8(static_cast<uint8_t>((hf >> 8) & 0xFF)));
+                // Check if it's an integer (no decimal point) or float
+                bool isFloat = (inst.arg1.find('.') != string::npos);
+                uint16_t val;
+                
+                if (isFloat) {
+                    float f = std::stof(inst.arg1);
+                    val = floatToHalf(f);
+                } else {
+                    // Raw integer - store directly as 16-bit value
+                    int intVal = std::stoi(inst.arg1);
+                    val = static_cast<uint16_t>(static_cast<int16_t>(intVal));
+                }
+                emit("ldi", "r24, " + hex8(static_cast<uint8_t>(val & 0xFF)));
+                emit("ldi", "r25, " + hex8(static_cast<uint8_t>((val >> 8) & 0xFF)));
             } else {
                 emit("lds", "r24, " + inst.arg1);
                 emit("lds", "r25, " + inst.arg1 + "+1");
@@ -205,7 +234,7 @@ void GeradorAssembly::gerarAssembly(const vector<InstrucaoTAC>& codigoTAC,
             continue;
         }
 
-        // Operações binárias e comparações
+        // OperaÃ§Ãµes binÃ¡rias e comparaÃ§Ãµes
         auto loadArg = [&](const string& arg, const string& rL, const string& rH) {
             bool literal = false;
             if (!arg.empty()) {
@@ -215,10 +244,20 @@ void GeradorAssembly::gerarAssembly(const vector<InstrucaoTAC>& codigoTAC,
             }
 
             if (literal) {
-                float f = std::stof(arg);
-                uint16_t hf = floatToHalf(f);
-                emit("ldi", rL + ", " + hex8(static_cast<uint8_t>(hf & 0xFF)));
-                emit("ldi", rH + ", " + hex8(static_cast<uint8_t>((hf >> 8) & 0xFF)));
+                // Check if it's an integer (no decimal point) or float
+                bool isFloat = (arg.find('.') != string::npos);
+                uint16_t val;
+                
+                if (isFloat) {
+                    float f = std::stof(arg);
+                    val = floatToHalf(f);
+                } else {
+                    // Raw integer - store directly as 16-bit value
+                    int intVal = std::stoi(arg);
+                    val = static_cast<uint16_t>(static_cast<int16_t>(intVal));
+                }
+                emit("ldi", rL + ", " + hex8(static_cast<uint8_t>(val & 0xFF)));
+                emit("ldi", rH + ", " + hex8(static_cast<uint8_t>((val >> 8) & 0xFF)));
             } else {
                 emit("lds", rL + ", " + arg);
                 emit("lds", rH + ", " + arg + "+1");
@@ -229,6 +268,7 @@ void GeradorAssembly::gerarAssembly(const vector<InstrucaoTAC>& codigoTAC,
         loadArg(inst.arg2, "r22", "r23");
 
         string rotina;
+        bool isComparison = false;
 
         if (inst.op == "+")       rotina = "__addhf3";
         else if (inst.op == "-")  rotina = "__subhf3";
@@ -237,11 +277,59 @@ void GeradorAssembly::gerarAssembly(const vector<InstrucaoTAC>& codigoTAC,
         else if (inst.op == "^")  rotina = "__powhf3";
         else if (inst.op == "<"  || inst.op == ">"  ||
                  inst.op == "<=" || inst.op == ">=" ||
-                 inst.op == "==" || inst.op == "!=")
+                 inst.op == "==" || inst.op == "!=") {
             rotina = "__cmphf2";
+            isComparison = true;
+        }
 
         if (!rotina.empty()) {
             emit("rcall", rotina);
+        }
+
+        // Para comparações, converter resultado de __cmphf2 para booleano
+        // __cmphf2 retorna: -1 (menor), 0 (igual), 1 (maior) em r24
+        if (isComparison) {
+            static int cmpCounter = 0;
+            string lblTrue = "CMP_TRUE_" + to_string(cmpCounter);
+            string lblEnd = "CMP_END_" + to_string(cmpCounter);
+            cmpCounter++;
+
+            // r24 contém resultado da comparação
+            if (inst.op == "==") {
+                emit("cpi", "r24, 0");
+                emit("breq", lblTrue, "Se r24 == 0, são iguais");
+            } else if (inst.op == "!=") {
+                emit("cpi", "r24, 0");
+                emit("brne", lblTrue, "Se r24 != 0, são diferentes");
+            } else if (inst.op == "<") {
+                // r24 = -1 (0xFF) significa menor
+                emit("cpi", "r24, 0xFF");
+                emit("breq", lblTrue, "Se r24 == -1, A < B");
+            } else if (inst.op == ">=") {
+                // r24 >= 0 significa maior ou igual (r24 = 0 ou r24 = 1)
+                emit("cpi", "r24, 0xFF");
+                emit("brne", lblTrue, "Se r24 != -1, A >= B");
+            } else if (inst.op == ">") {
+                // r24 = 1 significa maior
+                emit("cpi", "r24, 1");
+                emit("breq", lblTrue, "Se r24 == 1, A > B");
+            } else if (inst.op == "<=") {
+                // r24 <= 0 significa menor ou igual (r24 = -1 ou r24 = 0)
+                emit("cpi", "r24, 1");
+                emit("brne", lblTrue, "Se r24 != 1, A <= B");
+            }
+
+            // Resultado falso: 0
+            emit("clr", "r24");
+            emit("clr", "r25");
+            emit("rjmp", lblEnd);
+
+            // Resultado verdadeiro: 1
+            emitLabel(lblTrue);
+            emit("ldi", "r24, 1");
+            emit("clr", "r25");
+
+            emitLabel(lblEnd);
         }
 
         // Resultado em r24:r25
@@ -249,12 +337,12 @@ void GeradorAssembly::gerarAssembly(const vector<InstrucaoTAC>& codigoTAC,
         emit("sts", inst.result + "+1, r25");
     }
 
-    // Ao final do TAC, imprime variáveis e trava no fim
+    // Ao final do TAC, imprime variÃ¡veis e trava no fim
     emit("rcall", "DUMP_VARS");
     emit("rjmp", "FIM_DO_PROGRAMA");
 
     // ---------------------------------------------------------------------
-    // 6. Rotina DUMP_VARS – imprime todas as variáveis em hexa
+    // 6. Rotina DUMP_VARS â€“ imprime todas as variÃ¡veis em hexa
     // ---------------------------------------------------------------------
     assembly.push_back("");
     assembly.push_back("; --- DUMP RESULTADOS ---");
@@ -286,13 +374,13 @@ void GeradorAssembly::gerarAssembly(const vector<InstrucaoTAC>& codigoTAC,
     emit("ret", "");
 
     // ---------------------------------------------------------------------
-    // 7. Fim do programa: laço infinito
+    // 7. Fim do programa: laÃ§o infinito
     // ---------------------------------------------------------------------
     emitLabel("FIM_DO_PROGRAMA");
     emit("rjmp", "FIM_DO_PROGRAMA");
 
     // ---------------------------------------------------------------------
-    // 8. DRIVER SERIAL – implementações usadas acima
+    // 8. DRIVER SERIAL â€“ implementaÃ§Ãµes usadas acima
     // ---------------------------------------------------------------------
     assembly.push_back("");
     assembly.push_back("; --- DRIVER SERIAL ---");
@@ -318,7 +406,7 @@ void GeradorAssembly::gerarAssembly(const vector<InstrucaoTAC>& codigoTAC,
     emit("sts", "UDR0, temp");
     emit("ret", "");
 
-    // USART_PrintStr – Z aponta para string em Flash
+    // USART_PrintStr â€“ Z aponta para string em Flash
     emitLabel("USART_PrintStr");
     emitLabel("PrintStr_Loop");
     emit("lpm", "temp, Z+");
@@ -329,7 +417,7 @@ void GeradorAssembly::gerarAssembly(const vector<InstrucaoTAC>& codigoTAC,
     emitLabel("PrintStr_Done");
     emit("ret", "");
 
-    // USART_PrintHexByte – imprime temp em hexa
+    // USART_PrintHexByte â€“ imprime temp em hexa
     emitLabel("USART_PrintHexByte");
     emit("push", "temp");          // salva original
     emit("mov",  "temp2, temp");
@@ -350,31 +438,139 @@ void GeradorAssembly::gerarAssembly(const vector<InstrucaoTAC>& codigoTAC,
     emit("rcall", "USART_Tx");
     emit("ret", "");
 
-    // HexToAscii – converte 0..15 em '0'..'9','A'..'F' em temp2
+    // HexToAscii â€“ converte 0..15 em '0'..'9','A'..'F' em temp2
     emitLabel("HexToAscii");
     emit("cpi", "temp2, 10");
     emit("brlo", "HexDigit");
-    emit("subi", "temp2, -7");     // A-F: +7 em relação a '9'
+    emit("subi", "temp2, -7");     // A-F: +7 em relaÃ§Ã£o a '9'
     emitLabel("HexDigit");
     emit("subi", "temp2, -48");    // + '0'
     emit("ret", "");
 
     // ---------------------------------------------------------------------
-    // 9. STUBS de ponto flutuante 16-bit
-    //    (para compilar sem linkar nenhuma lib externa)
+    // 9. Rotinas de ponto flutuante 16-bit
+    //    Implementação simplificada para inteiros com escala
     // ---------------------------------------------------------------------
     assembly.push_back("");
-    assembly.push_back("; --- MATH STUBS 16-BIT (PLACEHOLDER) ---");
-    auto gerarStub = [&](const string& nome) {
-        emitLabel(nome);
-        emit("ret", "");
-    };
-    gerarStub("__addhf3");
-    gerarStub("__subhf3");
-    gerarStub("__mulhf3");
-    gerarStub("__divhf3");
-    gerarStub("__powhf3");
-    gerarStub("__cmphf2");
+    assembly.push_back("; --- MATH ROUTINES 16-BIT ---");
+    
+    // __addhf3: r24:r25 = r24:r25 + r22:r23
+    emitLabel("__addhf3");
+    emit("add", "r24, r22");
+    emit("adc", "r25, r23");
+    emit("ret", "");
+    
+    // __subhf3: r24:r25 = r24:r25 - r22:r23
+    emitLabel("__subhf3");
+    emit("sub", "r24, r22");
+    emit("sbc", "r25, r23");
+    emit("ret", "");
+    
+    // __mulhf3: r24:r25 = r24:r25 * r22:r23 (simplificado)
+    emitLabel("__mulhf3");
+    emit("push", "r18");
+    emit("push", "r19");
+    emit("push", "r20");
+    emit("push", "r21");
+    emit("clr", "r20");
+    emit("clr", "r21");
+    // r24*r22
+    emit("mul", "r24, r22");
+    emit("movw", "r18, r0");
+    // r24*r23
+    emit("mul", "r24, r23");
+    emit("add", "r19, r0");
+    emit("adc", "r20, r1");
+    // r25*r22
+    emit("mul", "r25, r22");
+    emit("add", "r19, r0");
+    emit("adc", "r20, r1");
+    // r25*r23
+    emit("mul", "r25, r23");
+    emit("add", "r20, r0");
+    emit("adc", "r21, r1");
+    // Resultado em r19:r18 (ignoramos overflow)
+    emit("mov", "r24, r18");
+    emit("mov", "r25, r19");
+    emit("clr", "r1");
+    emit("pop", "r21");
+    emit("pop", "r20");
+    emit("pop", "r19");
+    emit("pop", "r18");
+    emit("ret", "");
+    
+    // __divhf3: r24:r25 = r24:r25 / r22:r23 (simplificado)
+    emitLabel("__divhf3");
+    emit("push", "r18");
+    emit("push", "r19");
+    emit("clr", "r18", "Quociente L");
+    emit("clr", "r19", "Quociente H");
+    emitLabel("__div_loop");
+    emit("cp", "r24, r22");
+    emit("cpc", "r25, r23");
+    emit("brlo", "__div_done", "Se dividendo < divisor, termina");
+    emit("sub", "r24, r22");
+    emit("sbc", "r25, r23");
+    emit("subi", "r18, 0xFF", "Incrementa quociente (subi -1)");
+    emit("sbci", "r19, 0xFF");
+    emit("rjmp", "__div_loop");
+    emitLabel("__div_done");
+    emit("mov", "r24, r18");
+    emit("mov", "r25, r19");
+    emit("pop", "r19");
+    emit("pop", "r18");
+    emit("ret", "");
+    
+    // __powhf3: r24:r25 = r24:r25 ^ r22 (expoente inteiro)
+    emitLabel("__powhf3");
+    emit("push", "r18");
+    emit("push", "r19");
+    emit("push", "r20");
+    emit("push", "r21");
+    emit("mov", "r18, r24", "Base L");
+    emit("mov", "r19, r25", "Base H");
+    emit("mov", "r20, r22", "Expoente");
+    emit("cpi", "r20, 0");
+    emit("breq", "__pow_one", "Se exp=0, retorna 1");
+    emit("cpi", "r20, 1");
+    emit("breq", "__pow_done", "Se exp=1, retorna base");
+    // Resultado inicial = base
+    emit("dec", "r20");
+    emitLabel("__pow_loop");
+    emit("cpi", "r20, 0");
+    emit("breq", "__pow_done");
+    // Multiplicar resultado pela base
+    emit("mov", "r22, r18");
+    emit("mov", "r23, r19");
+    emit("rcall", "__mulhf3");
+    emit("dec", "r20");
+    emit("rjmp", "__pow_loop");
+    emitLabel("__pow_one");
+    emit("ldi", "r24, 1");
+    emit("clr", "r25");
+    emitLabel("__pow_done");
+    emit("pop", "r21");
+    emit("pop", "r20");
+    emit("pop", "r19");
+    emit("pop", "r18");
+    emit("ret", "");
+    
+    // __cmphf2: Compara r24:r25 com r22:r23
+    // Retorna: r24 = -1 se <, 0 se ==, 1 se >
+    emitLabel("__cmphf2");
+    emit("cp", "r24, r22", "Compara bytes baixos");
+    emit("cpc", "r25, r23", "Compara bytes altos com carry");
+    emit("breq", "__cmp_equal");
+    emit("brlt", "__cmp_less", "Signed: se r24:r25 < r22:r23");
+    // Maior
+    emit("ldi", "r24, 1");
+    emit("ret", "");
+    emitLabel("__cmp_less");
+    emit("ldi", "r24, 0xFF", "-1 em complemento de 2");
+    emit("ret", "");
+    emitLabel("__cmp_equal");
+    emit("clr", "r24");
+    emit("ret", "");
 
     // ---------------------------------------------------------------------
     // 10. Grava arquivo

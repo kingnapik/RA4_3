@@ -1,3 +1,7 @@
+// Integrantes do grupo:
+// Guilherme Knapik - kingnapik
+// Nome do grupo no Canvas: RA4_3
+
 #ifndef GERADOR_ASSEMBLY_H
 #define GERADOR_ASSEMBLY_H
 
@@ -5,35 +9,63 @@
 #include <vector>
 #include <string>
 #include <set>
-#include <map>
 #include <cstdint>
 
 using namespace std;
 
 class GeradorAssembly {
 private:
-    vector<string> assembly;      // Buffer de linhas do código gerado
-    set<string> variaveisGlobais; // Armazena nomes de variáveis para alocar na RAM (.dseg)
+    vector<string> assembly;
+    set<string> variaveisGlobais;
 
-    // --- MAPEAMENTO DE REGISTRADORES (AVR GCC Standard) ---
-    // Usaremos R25:R24 para o Operando 1 e Resultado
-    // Usaremos R23:R22 para o Operando 2
-    
-    // Funções Auxiliares
+    // Emissores basicos
     void emit(string inst, string args = "", string comment = "");
     void emitLabel(string label);
     
-    // Converte float C++ para representação binária IEEE 754 Half-Precision (16-bit)
+    // Conversao IEEE 754
     uint16_t floatToHalf(float value);
-    string hex16(uint16_t val); // Retorna "0x3C00"
 
-    // Analisa o TAC para descobrir quais variáveis precisam de memória
+    // Coleta variaveis do TAC
     void coletarVariaveis(const vector<InstrucaoTAC>& codigoTAC);
+
+    // === SECOES DO ASSEMBLY (arquivos separados) ===
+    
+    // asm_cabecalho.cpp
+    void emitirCabecalho();
+    void emitirSecaoDados();
+    void emitirSecaoTexto();
+    
+    // asm_setup.cpp
+    void emitirSetupInicio();
+    
+    // asm_traducao.cpp
+    void traduzirTAC(const vector<InstrucaoTAC>& codigoTAC);
+    void traduzirIfFalse(const InstrucaoTAC& inst);
+    void traduzirAtribuicao(const InstrucaoTAC& inst);
+    void traduzirOperacaoBinaria(const InstrucaoTAC& inst);
+    void carregarOperando(const string& arg, const string& rL, const string& rH);
+    void traduzirComparacao(const string& op);
+    
+    // asm_saida.cpp
+    void emitirDumpVars();
+    void emitirFimPrograma();
+    
+    // asm_serial.cpp
+    void emitirDriverSerial();
+    
+    // asm_float.cpp
+    void emitirRotinasFloat();
+    void emitirSubtracao();
+    void emitirAdicao();
+    void emitirMultiplicacao();
+    void emitirDivisao();
+    void emitirComparacaoFloat();
+    void emitirPotencia();
 
 public:
     GeradorAssembly();
     
-    // Método principal
+    // Metodo principal
     void gerarAssembly(const vector<InstrucaoTAC>& codigoTAC, string nomeArquivoSaida);
 };
 

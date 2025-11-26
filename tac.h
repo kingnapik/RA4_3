@@ -1,6 +1,6 @@
 // Integrantes do grupo:
 // Guilherme Knapik - kingnapik
-// Nome do grupo no Canvas: RA3_2
+// Nome do grupo no Canvas: RA4_3
 
 #ifndef TAC_H
 #define TAC_H
@@ -40,7 +40,7 @@ private:
     
     // Processamento
     void processar(NoArvore* no);
-    void processarCorpo(NoArvore* no); // Aqui acontece a magica do IF/FOR
+    void processarCorpo(NoArvore* no); // Aqui acontece a interpretacao do IF/FOR
     void processarOperacao(NoArvore* no);
     void processarRES(NoArvore* no);
     
@@ -49,7 +49,7 @@ private:
 public:
     GeradorTAC();
     
-    // Funcao principal (nome corrigido conforme pedido)
+    // Funcao principal
     void gerarTAC(NoArvore* arvoreAtribuida);
     
     void imprimirTAC();

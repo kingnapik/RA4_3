@@ -1,6 +1,6 @@
 // Integrantes do grupo:
 // Guilherme Knapik - kingnapik
-// Nome do grupo no Canvas: RA3_2
+// Nome do grupo no Canvas: RA4_3
 
 #include "tac.h"
 #include <iostream>
@@ -27,11 +27,11 @@ void GeradorTAC::limparPilha() {
 // Funcao principal chamada pela main
 void GeradorTAC::gerarTAC(NoArvore* arvoreAtribuida) {
     if (!arvoreAtribuida) return;
-    limpar();
+    limparPilha();  // apenas o stack do operando
     processar(arvoreAtribuida);
 }
 
-// Achata a arvore recursiva em uma lista sequencial
+//passa a arvore recursiva para uma lista sequencial
 void GeradorTAC::linearizarCorpo(NoArvore* no, vector<NoArvore*>& lista) {
     if (!no) return;
     
@@ -67,7 +67,7 @@ void GeradorTAC::processar(NoArvore* no) {
         if (!no->filhos.empty()) processar(no->filhos[0]);
     }
     // Tratamento de literais e variaveis
-    else if (sim == "E_ARITIMETICO" || sim == "E_ARITMETICO") { // Aceita ambas grafias
+    else if (sim == "E_ARITIMETICO" || sim == "E_ARITMETICO") {
         if (!no->filhos.empty()) {
             if (no->filhos[0]->simbolo == "P") processar(no->filhos[0]); // Recursao ( P )
             else pilhaOperandos.push(no->filhos[0]->simbolo); // Numero
@@ -97,7 +97,7 @@ void GeradorTAC::processarCorpo(NoArvore* no) {
     NoArvore* ultimo = elementos.back();
     string comando = "";
     
-    // Descobre o que é o ultimo elemento
+    // Descobre o que e o ultimo elemento
     if (!ultimo->filhos.empty() && !ultimo->filhos[0]->filhos.empty()) {
          // Navega E -> E_ESPECIAL -> IF/FOR/VAR
          if (ultimo->filhos[0]->simbolo == "E_ESPECIAL") {
@@ -105,7 +105,6 @@ void GeradorTAC::processarCorpo(NoArvore* no) {
          }
     }
 
-    // --- CASO 1: IF ---
     // Padrao: (COND) (THEN) (ELSE) IF
     if (comando == "IF" && elementos.size() >= 4) {
         // Elementos anteriores sao blocos P -> ( CORPO )
@@ -136,7 +135,6 @@ void GeradorTAC::processarCorpo(NoArvore* no) {
         return;
     }
 
-    // --- CASO 2: FOR ---
     // Padrao: (COND) (BODY) FOR
     if (comando == "FOR" && elementos.size() >= 3) {
         NoArvore* condicao = elementos[elementos.size() - 3];
@@ -166,11 +164,10 @@ void GeradorTAC::processarCorpo(NoArvore* no) {
         return;
     }
     
-    // --- CASO 3: MEM (Atribuicao) ---
     // Padrao: ( EXPRESSAO ) VARIAVEL
-    // O ultimo elemento é uma Variavel e temos apenas 2 itens
+    // O ultimo elemento e uma Variavel e temos apenas 2 itens
     if (elementos.size() == 2 && comando != "IF" && comando != "FOR" && comando != "RES") {
-        // Verifica se é variavel (letra maiuscula)
+        // Verifica se e variavel (ALL CAPS)
         if (!comando.empty() && isupper(comando[0])) {
             processar(elementos[0]); // Calcula valor
             string valor = pilhaOperandos.top(); pilhaOperandos.pop();
@@ -181,7 +178,6 @@ void GeradorTAC::processarCorpo(NoArvore* no) {
         }
     }
 
-    // --- CASO 4: Sequencia Normal ---
     // Se nao for especial, processa um por um (ex: calculos matematicos)
     for (auto elem : elementos) {
         processar(elem);
@@ -215,7 +211,7 @@ void GeradorTAC::processarRES(NoArvore* no) {
 }
 
 bool GeradorTAC::ehOperadorBinario(const string& op) {
-    return op == "+" || op == "-" || op == "*" || op == "/" || op == "%" || op == "^" || op == "|" || // Aritméticos 
+    return op == "+" || op == "-" || op == "*" || op == "/" || op == "%" || op == "^" || op == "|" || // AritmÃ©ticos 
            op == ">" || op == "<" || op == ">=" || op == "<=" || op == "==" || op == "!="; // Relacionais
 }
 

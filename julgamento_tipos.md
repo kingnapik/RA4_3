@@ -8,56 +8,43 @@ Este relatorio mostra ONDE e COMO cada regra de inferencia foi aplicada durante 
 
 ### LINHA 1
 
-#### Deducao: `10`
+#### Deducao: `0.5`
 
-**Tipo inferido:** `int`
+**Tipo inferido:** `real`
 
-**Regra aplicada:** Literal inteiro: 10 ∈ ℤ
+**Regra aplicada:** Literal real: 0.5 ∈ ℝ
 
 **Arvore de derivacao:**
 ```
-           10 ∈ ℤ
+           0.5 ∈ ℝ
         ─────────────────────
-        G |- 10 : int
+        G |- 0.5 : real
 ```
 
-#### Deducao: `5`
+#### Deducao: `X := valor`
 
-**Tipo inferido:** `int`
+**Tipo inferido:** `real`
 
-**Regra aplicada:** Literal inteiro: 5 ∈ ℤ
+**Regra aplicada:** MEM sintetiza tipo: G[X |-> real] |- MEM : real
 
 **Arvore de derivacao:**
 ```
-           5 ∈ ℤ
-        ─────────────────────
-        G |- 5 : int
+        G |- valor : real
+        ─────────────────────────────────
+        G[X |-> real] |- MEM : real |- MEM : real
 ```
 
-#### Deducao: `e1 + e2`
+#### Deducao: `X := valor`
 
-**Tipo inferido:** `int`
+**Tipo inferido:** `real`
 
-**Regra aplicada:** Operador aritmetico com promocao: G |- e1:int G |- e2:int => promover(int,int) = int
+**Regra aplicada:** MEM sintetiza tipo: G[X |-> real] |- MEM : real
 
 **Arvore de derivacao:**
 ```
-        G |- e₁ : T₁    G |- e₂ : T₂
-        ────────────────────────────
-        G |- e1 + e2 : int
-```
-
-#### Deducao: `(CORPO)`
-
-**Tipo inferido:** `int`
-
-**Regra aplicada:** Expressao parentizada: G |- (e) : int
-
-**Arvore de derivacao:**
-```
-        (regra: Expressao parentizada: G |- (e) : int)
-        ────────────────────────────
-        G |- (CORPO) : int
+        G |- valor : real
+        ─────────────────────────────────
+        G[X |-> real] |- MEM : real |- MEM : real
 ```
 
 
@@ -65,37 +52,63 @@ Este relatorio mostra ONDE e COMO cada regra de inferencia foi aplicada durante 
 
 ### LINHA 2
 
-#### Deducao: `20.1`
+#### Deducao: `0.0`
 
 **Tipo inferido:** `real`
 
-**Regra aplicada:** Literal real: 20.1 ∈ ℝ
+**Regra aplicada:** Literal real: 0.0 ∈ ℝ
 
 **Arvore de derivacao:**
 ```
-           20.1 ∈ ℝ
+           0.0 ∈ ℝ
         ─────────────────────
-        G |- 20.1 : real
+        G |- 0.0 : real
 ```
 
-#### Deducao: `4`
+#### Deducao: `e1 < e2`
 
-**Tipo inferido:** `int`
+**Tipo inferido:** `booleano`
 
-**Regra aplicada:** Literal inteiro: 4 ∈ ℤ
+**Regra aplicada:** Operador relacional sintetiza booleano: G |- e1:real G |- e2:real => booleano
 
 **Arvore de derivacao:**
 ```
-           4 ∈ ℤ
+        G |- e₁ : T    G |- e₂ : T
+        ────────────────────────────
+        G |- e1 < e2 : booleano
+```
+
+#### Deducao: `(CORPO)`
+
+**Tipo inferido:** `booleano`
+
+**Regra aplicada:** Expressao parentizada: G |- (e) : booleano
+
+**Arvore de derivacao:**
+```
+        (regra: Expressao parentizada: G |- (e) : booleano)
+        ────────────────────────────
+        G |- (CORPO) : booleano
+```
+
+#### Deducao: `0.0`
+
+**Tipo inferido:** `real`
+
+**Regra aplicada:** Literal real: 0.0 ∈ ℝ
+
+**Arvore de derivacao:**
+```
+           0.0 ∈ ℝ
         ─────────────────────
-        G |- 4 : int
+        G |- 0.0 : real
 ```
 
 #### Deducao: `e1 - e2`
 
 **Tipo inferido:** `real`
 
-**Regra aplicada:** Operador aritmetico com promocao: G |- e1:real G |- e2:int => promover(real,int) = real
+**Regra aplicada:** Operador aritmetico com promocao: G |- e1:real G |- e2:real => promover(real,real) = real
 
 **Arvore de derivacao:**
 ```
@@ -117,181 +130,106 @@ Este relatorio mostra ONDE e COMO cada regra de inferencia foi aplicada durante 
         G |- (CORPO) : real
 ```
 
+#### Deducao: `X := valor`
+
+**Tipo inferido:** `real`
+
+**Regra aplicada:** MEM sintetiza tipo: G[X |-> real] |- MEM : real
+
+**Arvore de derivacao:**
+```
+        G |- valor : real
+        ─────────────────────────────────
+        G[X |-> real] |- MEM : real |- MEM : real
+```
+
+#### Deducao: `(CORPO)`
+
+**Tipo inferido:** `booleano`
+
+**Regra aplicada:** Expressao parentizada: G |- (e) : booleano
+
+**Arvore de derivacao:**
+```
+        (regra: Expressao parentizada: G |- (e) : booleano)
+        ────────────────────────────
+        G |- (CORPO) : booleano
+```
+
+#### Deducao: `X := valor`
+
+**Tipo inferido:** `real`
+
+**Regra aplicada:** MEM sintetiza tipo: G[X |-> real] |- MEM : real
+
+**Arvore de derivacao:**
+```
+        G |- valor : real
+        ─────────────────────────────────
+        G[X |-> real] |- MEM : real |- MEM : real
+```
+
+#### Deducao: `IF encontrado`
+
+**Tipo inferido:** `marker`
+
+**Regra aplicada:** Marcador IF
+
+**Arvore de derivacao:**
+```
+        (regra: Marcador IF)
+        ────────────────────────────
+        G |- IF encontrado : marker
+```
+
 
 ---
 
 ### LINHA 3
 
-#### Deducao: `7`
+#### Deducao: `1.0`
 
-**Tipo inferido:** `int`
+**Tipo inferido:** `real`
 
-**Regra aplicada:** Literal inteiro: 7 ∈ ℤ
+**Regra aplicada:** Literal real: 1.0 ∈ ℝ
 
 **Arvore de derivacao:**
 ```
-           7 ∈ ℤ
+           1.0 ∈ ℝ
         ─────────────────────
-        G |- 7 : int
+        G |- 1.0 : real
 ```
 
-#### Deducao: `3`
+#### Deducao: `R := valor`
 
-**Tipo inferido:** `int`
+**Tipo inferido:** `real`
 
-**Regra aplicada:** Literal inteiro: 3 ∈ ℤ
+**Regra aplicada:** MEM sintetiza tipo: G[R |-> real] |- MEM : real
 
 **Arvore de derivacao:**
 ```
-           3 ∈ ℤ
-        ─────────────────────
-        G |- 3 : int
+        G |- valor : real
+        ─────────────────────────────────
+        G[R |-> real] |- MEM : real |- MEM : real
 ```
 
-#### Deducao: `e1 * e2`
+#### Deducao: `R := valor`
 
-**Tipo inferido:** `int`
+**Tipo inferido:** `real`
 
-**Regra aplicada:** Operador aritmetico com promocao: G |- e1:int G |- e2:int => promover(int,int) = int
+**Regra aplicada:** MEM sintetiza tipo: G[R |-> real] |- MEM : real
 
 **Arvore de derivacao:**
 ```
-        G |- e₁ : T₁    G |- e₂ : T₂
-        ────────────────────────────
-        G |- e1 * e2 : int
-```
-
-#### Deducao: `(CORPO)`
-
-**Tipo inferido:** `int`
-
-**Regra aplicada:** Expressao parentizada: G |- (e) : int
-
-**Arvore de derivacao:**
-```
-        (regra: Expressao parentizada: G |- (e) : int)
-        ────────────────────────────
-        G |- (CORPO) : int
+        G |- valor : real
+        ─────────────────────────────────
+        G[R |-> real] |- MEM : real |- MEM : real
 ```
 
 
 ---
 
 ### LINHA 4
-
-#### Deducao: `15`
-
-**Tipo inferido:** `int`
-
-**Regra aplicada:** Literal inteiro: 15 ∈ ℤ
-
-**Arvore de derivacao:**
-```
-           15 ∈ ℤ
-        ─────────────────────
-        G |- 15 : int
-```
-
-#### Deducao: `3`
-
-**Tipo inferido:** `int`
-
-**Regra aplicada:** Literal inteiro: 3 ∈ ℤ
-
-**Arvore de derivacao:**
-```
-           3 ∈ ℤ
-        ─────────────────────
-        G |- 3 : int
-```
-
-#### Deducao: `e1 / e2`
-
-**Tipo inferido:** `int`
-
-**Regra aplicada:** Operacao inteira: G |- e1:int G |- e2:int => int
-
-**Arvore de derivacao:**
-```
-        (regra: Operacao inteira: G |- e1:int G |- e2:int => int)
-        ────────────────────────────
-        G |- e1 / e2 : int
-```
-
-#### Deducao: `(CORPO)`
-
-**Tipo inferido:** `int`
-
-**Regra aplicada:** Expressao parentizada: G |- (e) : int
-
-**Arvore de derivacao:**
-```
-        (regra: Expressao parentizada: G |- (e) : int)
-        ────────────────────────────
-        G |- (CORPO) : int
-```
-
-
----
-
-### LINHA 5
-
-#### Deducao: `22`
-
-**Tipo inferido:** `int`
-
-**Regra aplicada:** Literal inteiro: 22 ∈ ℤ
-
-**Arvore de derivacao:**
-```
-           22 ∈ ℤ
-        ─────────────────────
-        G |- 22 : int
-```
-
-#### Deducao: `7`
-
-**Tipo inferido:** `int`
-
-**Regra aplicada:** Literal inteiro: 7 ∈ ℤ
-
-**Arvore de derivacao:**
-```
-           7 ∈ ℤ
-        ─────────────────────
-        G |- 7 : int
-```
-
-#### Deducao: `e1 % e2`
-
-**Tipo inferido:** `int`
-
-**Regra aplicada:** Operacao inteira: G |- e1:int G |- e2:int => int
-
-**Arvore de derivacao:**
-```
-        (regra: Operacao inteira: G |- e1:int G |- e2:int => int)
-        ────────────────────────────
-        G |- e1 % e2 : int
-```
-
-#### Deducao: `(CORPO)`
-
-**Tipo inferido:** `int`
-
-**Regra aplicada:** Expressao parentizada: G |- (e) : int
-
-**Arvore de derivacao:**
-```
-        (regra: Expressao parentizada: G |- (e) : int)
-        ────────────────────────────
-        G |- (CORPO) : int
-```
-
-
----
-
-### LINHA 6
 
 #### Deducao: `2`
 
@@ -306,72 +244,85 @@ Este relatorio mostra ONDE e COMO cada regra de inferencia foi aplicada durante 
         G |- 2 : int
 ```
 
-#### Deducao: `8.1`
+#### Deducao: `e1 ^ e2`
 
 **Tipo inferido:** `real`
 
-**Regra aplicada:** Literal real: 8.1 ∈ ℝ
+**Regra aplicada:** Exponenciacao (expoente int): G |- e1:real G |- e2:int => real
 
 **Arvore de derivacao:**
 ```
-           8.1 ∈ ℝ
-        ─────────────────────
-        G |- 8.1 : real
+        (regra: Exponenciacao (expoente int): G |- e1:real G |- e2:int => real)
+        ────────────────────────────
+        G |- e1 ^ e2 : real
 ```
 
 #### Deducao: `(CORPO)`
 
-**Tipo inferido:** `erro`
+**Tipo inferido:** `real`
 
-**Regra aplicada:** Expressao parentizada: G |- (e) : erro
+**Regra aplicada:** Expressao parentizada: G |- (e) : real
 
 **Arvore de derivacao:**
 ```
-        (regra: Expressao parentizada: G |- (e) : erro)
+        (regra: Expressao parentizada: G |- (e) : real)
         ────────────────────────────
-        G |- (CORPO) : erro
+        G |- (CORPO) : real
+```
+
+#### Deducao: `N2 := valor`
+
+**Tipo inferido:** `real`
+
+**Regra aplicada:** MEM sintetiza tipo: G[N2 |-> real] |- MEM : real
+
+**Arvore de derivacao:**
+```
+        G |- valor : real
+        ─────────────────────────────────
+        G[N2 |-> real] |- MEM : real |- MEM : real
+```
+
+#### Deducao: `N2 := valor`
+
+**Tipo inferido:** `real`
+
+**Regra aplicada:** MEM sintetiza tipo: G[N2 |-> real] |- MEM : real
+
+**Arvore de derivacao:**
+```
+        G |- valor : real
+        ─────────────────────────────────
+        G[N2 |-> real] |- MEM : real |- MEM : real
 ```
 
 
 ---
 
-### LINHA 7
+### LINHA 5
 
-#### Deducao: `100`
+#### Deducao: `2.0`
 
-**Tipo inferido:** `int`
+**Tipo inferido:** `real`
 
-**Regra aplicada:** Literal inteiro: 100 ∈ ℤ
-
-**Arvore de derivacao:**
-```
-           100 ∈ ℤ
-        ─────────────────────
-        G |- 100 : int
-```
-
-#### Deducao: `25`
-
-**Tipo inferido:** `int`
-
-**Regra aplicada:** Literal inteiro: 25 ∈ ℤ
+**Regra aplicada:** Literal real: 2.0 ∈ ℝ
 
 **Arvore de derivacao:**
 ```
-           25 ∈ ℤ
+           2.0 ∈ ℝ
         ─────────────────────
-        G |- 25 : int
+        G |- 2.0 : real
 ```
 
 #### Deducao: `e1 | e2`
 
 **Tipo inferido:** `real`
 
-**Regra aplicada:** Divisao real: G |- e1:int G |- e2:int => real
+**Regra aplicada:** Divisao real: G |- e1:real G |- e2:real => real
 
 **Arvore de derivacao:**
 ```
-        (regra: Divisao real: G |- e1:int G |- e2:int => real)
+        (regra: Divisao real: G |- e1:real G |- e2:real => real)
         ────────────────────────────
         G |- e1 | e2 : real
 ```
@@ -389,48 +340,227 @@ Este relatorio mostra ONDE e COMO cada regra de inferencia foi aplicada durante 
         G |- (CORPO) : real
 ```
 
+#### Deducao: `T2 := valor`
+
+**Tipo inferido:** `real`
+
+**Regra aplicada:** MEM sintetiza tipo: G[T2 |-> real] |- MEM : real
+
+**Arvore de derivacao:**
+```
+        G |- valor : real
+        ─────────────────────────────────
+        G[T2 |-> real] |- MEM : real |- MEM : real
+```
+
+#### Deducao: `T2 := valor`
+
+**Tipo inferido:** `real`
+
+**Regra aplicada:** MEM sintetiza tipo: G[T2 |-> real] |- MEM : real
+
+**Arvore de derivacao:**
+```
+        G |- valor : real
+        ─────────────────────────────────
+        G[T2 |-> real] |- MEM : real |- MEM : real
+```
+
+
+---
+
+### LINHA 6
+
+#### Deducao: `e1 - e2`
+
+**Tipo inferido:** `real`
+
+**Regra aplicada:** Operador aritmetico com promocao: G |- e1:real G |- e2:real => promover(real,real) = real
+
+**Arvore de derivacao:**
+```
+        G |- e₁ : T₁    G |- e₂ : T₂
+        ────────────────────────────
+        G |- e1 - e2 : real
+```
+
+#### Deducao: `(CORPO)`
+
+**Tipo inferido:** `real`
+
+**Regra aplicada:** Expressao parentizada: G |- (e) : real
+
+**Arvore de derivacao:**
+```
+        (regra: Expressao parentizada: G |- (e) : real)
+        ────────────────────────────
+        G |- (CORPO) : real
+```
+
+#### Deducao: `R := valor`
+
+**Tipo inferido:** `real`
+
+**Regra aplicada:** MEM sintetiza tipo: G[R |-> real] |- MEM : real
+
+**Arvore de derivacao:**
+```
+        G |- valor : real
+        ─────────────────────────────────
+        G[R |-> real] |- MEM : real |- MEM : real
+```
+
+#### Deducao: `R := valor`
+
+**Tipo inferido:** `real`
+
+**Regra aplicada:** MEM sintetiza tipo: G[R |-> real] |- MEM : real
+
+**Arvore de derivacao:**
+```
+        G |- valor : real
+        ─────────────────────────────────
+        G[R |-> real] |- MEM : real |- MEM : real
+```
+
+
+---
+
+### LINHA 7
+
+#### Deducao: `4`
+
+**Tipo inferido:** `int`
+
+**Regra aplicada:** Literal inteiro: 4 ∈ ℤ
+
+**Arvore de derivacao:**
+```
+           4 ∈ ℤ
+        ─────────────────────
+        G |- 4 : int
+```
+
+#### Deducao: `e1 ^ e2`
+
+**Tipo inferido:** `real`
+
+**Regra aplicada:** Exponenciacao (expoente int): G |- e1:real G |- e2:int => real
+
+**Arvore de derivacao:**
+```
+        (regra: Exponenciacao (expoente int): G |- e1:real G |- e2:int => real)
+        ────────────────────────────
+        G |- e1 ^ e2 : real
+```
+
+#### Deducao: `(CORPO)`
+
+**Tipo inferido:** `real`
+
+**Regra aplicada:** Expressao parentizada: G |- (e) : real
+
+**Arvore de derivacao:**
+```
+        (regra: Expressao parentizada: G |- (e) : real)
+        ────────────────────────────
+        G |- (CORPO) : real
+```
+
+#### Deducao: `N4 := valor`
+
+**Tipo inferido:** `real`
+
+**Regra aplicada:** MEM sintetiza tipo: G[N4 |-> real] |- MEM : real
+
+**Arvore de derivacao:**
+```
+        G |- valor : real
+        ─────────────────────────────────
+        G[N4 |-> real] |- MEM : real |- MEM : real
+```
+
+#### Deducao: `N4 := valor`
+
+**Tipo inferido:** `real`
+
+**Regra aplicada:** MEM sintetiza tipo: G[N4 |-> real] |- MEM : real
+
+**Arvore de derivacao:**
+```
+        G |- valor : real
+        ─────────────────────────────────
+        G[N4 |-> real] |- MEM : real |- MEM : real
+```
+
 
 ---
 
 ### LINHA 8
 
-#### Deducao: `50`
+#### Deducao: `24.0`
 
-**Tipo inferido:** `int`
+**Tipo inferido:** `real`
 
-**Regra aplicada:** Literal inteiro: 50 ∈ ℤ
+**Regra aplicada:** Literal real: 24.0 ∈ ℝ
 
 **Arvore de derivacao:**
 ```
-           50 ∈ ℤ
+           24.0 ∈ ℝ
         ─────────────────────
-        G |- 50 : int
+        G |- 24.0 : real
 ```
 
-#### Deducao: `A := valor`
+#### Deducao: `e1 | e2`
 
-**Tipo inferido:** `int`
+**Tipo inferido:** `real`
 
-**Regra aplicada:** MEM sintetiza tipo: G[A |-> int] |- MEM : int
+**Regra aplicada:** Divisao real: G |- e1:real G |- e2:real => real
 
 **Arvore de derivacao:**
 ```
-        G |- valor : int
-        ─────────────────────────────────
-        G[A |-> int] |- MEM : int |- MEM : int
+        (regra: Divisao real: G |- e1:real G |- e2:real => real)
+        ────────────────────────────
+        G |- e1 | e2 : real
 ```
 
-#### Deducao: `A := valor`
+#### Deducao: `(CORPO)`
 
-**Tipo inferido:** `int`
+**Tipo inferido:** `real`
 
-**Regra aplicada:** MEM sintetiza tipo: G[A |-> int] |- MEM : int
+**Regra aplicada:** Expressao parentizada: G |- (e) : real
 
 **Arvore de derivacao:**
 ```
-        G |- valor : int
+        (regra: Expressao parentizada: G |- (e) : real)
+        ────────────────────────────
+        G |- (CORPO) : real
+```
+
+#### Deducao: `T4 := valor`
+
+**Tipo inferido:** `real`
+
+**Regra aplicada:** MEM sintetiza tipo: G[T4 |-> real] |- MEM : real
+
+**Arvore de derivacao:**
+```
+        G |- valor : real
         ─────────────────────────────────
-        G[A |-> int] |- MEM : int |- MEM : int
+        G[T4 |-> real] |- MEM : real |- MEM : real
+```
+
+#### Deducao: `T4 := valor`
+
+**Tipo inferido:** `real`
+
+**Regra aplicada:** MEM sintetiza tipo: G[T4 |-> real] |- MEM : real
+
+**Arvore de derivacao:**
+```
+        G |- valor : real
+        ─────────────────────────────────
+        G[T4 |-> real] |- MEM : real |- MEM : real
 ```
 
 
@@ -438,43 +568,56 @@ Este relatorio mostra ONDE e COMO cada regra de inferencia foi aplicada durante 
 
 ### LINHA 9
 
-#### Deducao: `10`
+#### Deducao: `e1 + e2`
 
-**Tipo inferido:** `int`
+**Tipo inferido:** `real`
 
-**Regra aplicada:** Literal inteiro: 10 ∈ ℤ
-
-**Arvore de derivacao:**
-```
-           10 ∈ ℤ
-        ─────────────────────
-        G |- 10 : int
-```
-
-#### Deducao: `e1 > e2`
-
-**Tipo inferido:** `booleano`
-
-**Regra aplicada:** Operador relacional sintetiza booleano: G |- e1:int G |- e2:int => booleano
+**Regra aplicada:** Operador aritmetico com promocao: G |- e1:real G |- e2:real => promover(real,real) = real
 
 **Arvore de derivacao:**
 ```
-        G |- e₁ : T    G |- e₂ : T
+        G |- e₁ : T₁    G |- e₂ : T₂
         ────────────────────────────
-        G |- e1 > e2 : booleano
+        G |- e1 + e2 : real
 ```
 
 #### Deducao: `(CORPO)`
 
-**Tipo inferido:** `booleano`
+**Tipo inferido:** `real`
 
-**Regra aplicada:** Expressao parentizada: G |- (e) : booleano
+**Regra aplicada:** Expressao parentizada: G |- (e) : real
 
 **Arvore de derivacao:**
 ```
-        (regra: Expressao parentizada: G |- (e) : booleano)
+        (regra: Expressao parentizada: G |- (e) : real)
         ────────────────────────────
-        G |- (CORPO) : booleano
+        G |- (CORPO) : real
+```
+
+#### Deducao: `R := valor`
+
+**Tipo inferido:** `real`
+
+**Regra aplicada:** MEM sintetiza tipo: G[R |-> real] |- MEM : real
+
+**Arvore de derivacao:**
+```
+        G |- valor : real
+        ─────────────────────────────────
+        G[R |-> real] |- MEM : real |- MEM : real
+```
+
+#### Deducao: `R := valor`
+
+**Tipo inferido:** `real`
+
+**Regra aplicada:** MEM sintetiza tipo: G[R |-> real] |- MEM : real
+
+**Arvore de derivacao:**
+```
+        G |- valor : real
+        ─────────────────────────────────
+        G[R |-> real] |- MEM : real |- MEM : real
 ```
 
 
@@ -482,108 +625,69 @@ Este relatorio mostra ONDE e COMO cada regra de inferencia foi aplicada durante 
 
 ### LINHA 10
 
-#### Deducao: `10`
+#### Deducao: `6`
 
 **Tipo inferido:** `int`
 
-**Regra aplicada:** Literal inteiro: 10 ∈ ℤ
+**Regra aplicada:** Literal inteiro: 6 ∈ ℤ
 
 **Arvore de derivacao:**
 ```
-           10 ∈ ℤ
+           6 ∈ ℤ
         ─────────────────────
-        G |- 10 : int
+        G |- 6 : int
 ```
 
-#### Deducao: `e1 > e2`
+#### Deducao: `e1 ^ e2`
 
-**Tipo inferido:** `booleano`
+**Tipo inferido:** `real`
 
-**Regra aplicada:** Operador relacional sintetiza booleano: G |- e1:int G |- e2:int => booleano
+**Regra aplicada:** Exponenciacao (expoente int): G |- e1:real G |- e2:int => real
 
 **Arvore de derivacao:**
 ```
-        G |- e₁ : T    G |- e₂ : T
+        (regra: Exponenciacao (expoente int): G |- e1:real G |- e2:int => real)
         ────────────────────────────
-        G |- e1 > e2 : booleano
+        G |- e1 ^ e2 : real
 ```
 
 #### Deducao: `(CORPO)`
 
-**Tipo inferido:** `booleano`
+**Tipo inferido:** `real`
 
-**Regra aplicada:** Expressao parentizada: G |- (e) : booleano
+**Regra aplicada:** Expressao parentizada: G |- (e) : real
 
 **Arvore de derivacao:**
 ```
-        (regra: Expressao parentizada: G |- (e) : booleano)
+        (regra: Expressao parentizada: G |- (e) : real)
         ────────────────────────────
-        G |- (CORPO) : booleano
+        G |- (CORPO) : real
 ```
 
-#### Deducao: `2`
+#### Deducao: `N6 := valor`
 
-**Tipo inferido:** `int`
+**Tipo inferido:** `real`
 
-**Regra aplicada:** Literal inteiro: 2 ∈ ℤ
+**Regra aplicada:** MEM sintetiza tipo: G[N6 |-> real] |- MEM : real
 
 **Arvore de derivacao:**
 ```
-           2 ∈ ℤ
-        ─────────────────────
-        G |- 2 : int
+        G |- valor : real
+        ─────────────────────────────────
+        G[N6 |-> real] |- MEM : real |- MEM : real
 ```
 
-#### Deducao: `e1 * e2`
+#### Deducao: `N6 := valor`
 
-**Tipo inferido:** `int`
+**Tipo inferido:** `real`
 
-**Regra aplicada:** Operador aritmetico com promocao: G |- e1:int G |- e2:int => promover(int,int) = int
+**Regra aplicada:** MEM sintetiza tipo: G[N6 |-> real] |- MEM : real
 
 **Arvore de derivacao:**
 ```
-        G |- e₁ : T₁    G |- e₂ : T₂
-        ────────────────────────────
-        G |- e1 * e2 : int
-```
-
-#### Deducao: `(CORPO)`
-
-**Tipo inferido:** `int`
-
-**Regra aplicada:** Expressao parentizada: G |- (e) : int
-
-**Arvore de derivacao:**
-```
-        (regra: Expressao parentizada: G |- (e) : int)
-        ────────────────────────────
-        G |- (CORPO) : int
-```
-
-#### Deducao: `(CORPO)`
-
-**Tipo inferido:** `booleano`
-
-**Regra aplicada:** Expressao parentizada: G |- (e) : booleano
-
-**Arvore de derivacao:**
-```
-        (regra: Expressao parentizada: G |- (e) : booleano)
-        ────────────────────────────
-        G |- (CORPO) : booleano
-```
-
-#### Deducao: `IF encontrado`
-
-**Tipo inferido:** `marker`
-
-**Regra aplicada:** Marcador IF
-
-**Arvore de derivacao:**
-```
-        (regra: Marcador IF)
-        ────────────────────────────
-        G |- IF encontrado : marker
+        G |- valor : real
+        ─────────────────────────────────
+        G[N6 |-> real] |- MEM : real |- MEM : real
 ```
 
 
@@ -591,43 +695,69 @@ Este relatorio mostra ONDE e COMO cada regra de inferencia foi aplicada durante 
 
 ### LINHA 11
 
-#### Deducao: `1`
+#### Deducao: `720.0`
 
-**Tipo inferido:** `int`
+**Tipo inferido:** `real`
 
-**Regra aplicada:** Literal inteiro: 1 ∈ ℤ
+**Regra aplicada:** Literal real: 720.0 ∈ ℝ
 
 **Arvore de derivacao:**
 ```
-           1 ∈ ℤ
+           720.0 ∈ ℝ
         ─────────────────────
-        G |- 1 : int
+        G |- 720.0 : real
 ```
 
-#### Deducao: `RES := valor`
+#### Deducao: `e1 | e2`
 
-**Tipo inferido:** `int`
+**Tipo inferido:** `real`
 
-**Regra aplicada:** MEM sintetiza tipo: G[RES |-> int] |- MEM : int
+**Regra aplicada:** Divisao real: G |- e1:real G |- e2:real => real
 
 **Arvore de derivacao:**
 ```
-        G |- valor : int
-        ─────────────────────────────────
-        G[RES |-> int] |- MEM : int |- MEM : int
+        (regra: Divisao real: G |- e1:real G |- e2:real => real)
+        ────────────────────────────
+        G |- e1 | e2 : real
 ```
 
-#### Deducao: `RES := valor`
+#### Deducao: `(CORPO)`
 
-**Tipo inferido:** `int`
+**Tipo inferido:** `real`
 
-**Regra aplicada:** MEM sintetiza tipo: G[RES |-> int] |- MEM : int
+**Regra aplicada:** Expressao parentizada: G |- (e) : real
 
 **Arvore de derivacao:**
 ```
-        G |- valor : int
+        (regra: Expressao parentizada: G |- (e) : real)
+        ────────────────────────────
+        G |- (CORPO) : real
+```
+
+#### Deducao: `T6 := valor`
+
+**Tipo inferido:** `real`
+
+**Regra aplicada:** MEM sintetiza tipo: G[T6 |-> real] |- MEM : real
+
+**Arvore de derivacao:**
+```
+        G |- valor : real
         ─────────────────────────────────
-        G[RES |-> int] |- MEM : int |- MEM : int
+        G[T6 |-> real] |- MEM : real |- MEM : real
+```
+
+#### Deducao: `T6 := valor`
+
+**Tipo inferido:** `real`
+
+**Regra aplicada:** MEM sintetiza tipo: G[T6 |-> real] |- MEM : real
+
+**Arvore de derivacao:**
+```
+        G |- valor : real
+        ─────────────────────────────────
+        G[T6 |-> real] |- MEM : real |- MEM : real
 ```
 
 
@@ -635,401 +765,56 @@ Este relatorio mostra ONDE e COMO cada regra de inferencia foi aplicada durante 
 
 ### LINHA 12
 
-#### Deducao: `100`
-
-**Tipo inferido:** `int`
-
-**Regra aplicada:** Literal inteiro: 100 ∈ ℤ
-
-**Arvore de derivacao:**
-```
-           100 ∈ ℤ
-        ─────────────────────
-        G |- 100 : int
-```
-
-#### Deducao: `(CORPO)`
-
-**Tipo inferido:** `erro`
-
-**Regra aplicada:** Expressao parentizada: G |- (e) : erro
-
-**Arvore de derivacao:**
-```
-        (regra: Expressao parentizada: G |- (e) : erro)
-        ────────────────────────────
-        G |- (CORPO) : erro
-```
-
-#### Deducao: `4`
-
-**Tipo inferido:** `int`
-
-**Regra aplicada:** Literal inteiro: 4 ∈ ℤ
-
-**Arvore de derivacao:**
-```
-           4 ∈ ℤ
-        ─────────────────────
-        G |- 4 : int
-```
-
-#### Deducao: `4`
-
-**Tipo inferido:** `int`
-
-**Regra aplicada:** Literal inteiro: 4 ∈ ℤ
-
-**Arvore de derivacao:**
-```
-           4 ∈ ℤ
-        ─────────────────────
-        G |- 4 : int
-```
-
-#### Deducao: `e1 * e2`
-
-**Tipo inferido:** `int`
-
-**Regra aplicada:** Operador aritmetico com promocao: G |- e1:int G |- e2:int => promover(int,int) = int
-
-**Arvore de derivacao:**
-```
-        G |- e₁ : T₁    G |- e₂ : T₂
-        ────────────────────────────
-        G |- e1 * e2 : int
-```
-
-#### Deducao: `(CORPO)`
-
-**Tipo inferido:** `int`
-
-**Regra aplicada:** Expressao parentizada: G |- (e) : int
-
-**Arvore de derivacao:**
-```
-        (regra: Expressao parentizada: G |- (e) : int)
-        ────────────────────────────
-        G |- (CORPO) : int
-```
-
-#### Deducao: `(CORPO)`
-
-**Tipo inferido:** `erro`
-
-**Regra aplicada:** Expressao parentizada: G |- (e) : erro
-
-**Arvore de derivacao:**
-```
-        (regra: Expressao parentizada: G |- (e) : erro)
-        ────────────────────────────
-        G |- (CORPO) : erro
-```
-
-#### Deducao: `FOR encontrado`
-
-**Tipo inferido:** `marker`
-
-**Regra aplicada:** Marcador FOR
-
-**Arvore de derivacao:**
-```
-        (regra: Marcador FOR)
-        ────────────────────────────
-        G |- FOR encontrado : marker
-```
-
-
----
-
-### LINHA 13
-
-#### Deducao: `8`
-
-**Tipo inferido:** `int`
-
-**Regra aplicada:** Literal inteiro: 8 ∈ ℤ
-
-**Arvore de derivacao:**
-```
-           8 ∈ ℤ
-        ─────────────────────
-        G |- 8 : int
-```
-
-#### Deducao: `4`
-
-**Tipo inferido:** `int`
-
-**Regra aplicada:** Literal inteiro: 4 ∈ ℤ
-
-**Arvore de derivacao:**
-```
-           4 ∈ ℤ
-        ─────────────────────
-        G |- 4 : int
-```
-
-#### Deducao: `e1 + e2`
-
-**Tipo inferido:** `int`
-
-**Regra aplicada:** Operador aritmetico com promocao: G |- e1:int G |- e2:int => promover(int,int) = int
-
-**Arvore de derivacao:**
-```
-        G |- e₁ : T₁    G |- e₂ : T₂
-        ────────────────────────────
-        G |- e1 + e2 : int
-```
-
-#### Deducao: `(CORPO)`
-
-**Tipo inferido:** `int`
-
-**Regra aplicada:** Expressao parentizada: G |- (e) : int
-
-**Arvore de derivacao:**
-```
-        (regra: Expressao parentizada: G |- (e) : int)
-        ────────────────────────────
-        G |- (CORPO) : int
-```
-
-#### Deducao: `3`
-
-**Tipo inferido:** `int`
-
-**Regra aplicada:** Literal inteiro: 3 ∈ ℤ
-
-**Arvore de derivacao:**
-```
-           3 ∈ ℤ
-        ─────────────────────
-        G |- 3 : int
-```
-
-#### Deducao: `2`
-
-**Tipo inferido:** `int`
-
-**Regra aplicada:** Literal inteiro: 2 ∈ ℤ
-
-**Arvore de derivacao:**
-```
-           2 ∈ ℤ
-        ─────────────────────
-        G |- 2 : int
-```
-
-#### Deducao: `e1 * e2`
-
-**Tipo inferido:** `int`
-
-**Regra aplicada:** Operador aritmetico com promocao: G |- e1:int G |- e2:int => promover(int,int) = int
-
-**Arvore de derivacao:**
-```
-        G |- e₁ : T₁    G |- e₂ : T₂
-        ────────────────────────────
-        G |- e1 * e2 : int
-```
-
-#### Deducao: `(CORPO)`
-
-**Tipo inferido:** `int`
-
-**Regra aplicada:** Expressao parentizada: G |- (e) : int
-
-**Arvore de derivacao:**
-```
-        (regra: Expressao parentizada: G |- (e) : int)
-        ────────────────────────────
-        G |- (CORPO) : int
-```
-
 #### Deducao: `e1 - e2`
 
-**Tipo inferido:** `int`
+**Tipo inferido:** `real`
 
-**Regra aplicada:** Operador aritmetico com promocao: G |- e1:int G |- e2:int => promover(int,int) = int
-
-**Arvore de derivacao:**
-```
-        G |- e₁ : T₁    G |- e₂ : T₂
-        ────────────────────────────
-        G |- e1 - e2 : int
-```
-
-#### Deducao: `(CORPO)`
-
-**Tipo inferido:** `int`
-
-**Regra aplicada:** Expressao parentizada: G |- (e) : int
-
-**Arvore de derivacao:**
-```
-        (regra: Expressao parentizada: G |- (e) : int)
-        ────────────────────────────
-        G |- (CORPO) : int
-```
-
-
----
-
-### LINHA 14
-
-#### Deducao: `100`
-
-**Tipo inferido:** `int`
-
-**Regra aplicada:** Literal inteiro: 100 ∈ ℤ
-
-**Arvore de derivacao:**
-```
-           100 ∈ ℤ
-        ─────────────────────
-        G |- 100 : int
-```
-
-#### Deducao: `B := valor`
-
-**Tipo inferido:** `int`
-
-**Regra aplicada:** MEM sintetiza tipo: G[B |-> int] |- MEM : int
-
-**Arvore de derivacao:**
-```
-        G |- valor : int
-        ─────────────────────────────────
-        G[B |-> int] |- MEM : int |- MEM : int
-```
-
-#### Deducao: `B := valor`
-
-**Tipo inferido:** `int`
-
-**Regra aplicada:** MEM sintetiza tipo: G[B |-> int] |- MEM : int
-
-**Arvore de derivacao:**
-```
-        G |- valor : int
-        ─────────────────────────────────
-        G[B |-> int] |- MEM : int |- MEM : int
-```
-
-
----
-
-### LINHA 15
-
-#### Deducao: `e1 < e2`
-
-**Tipo inferido:** `booleano`
-
-**Regra aplicada:** Operador relacional sintetiza booleano: G |- e1:int G |- e2:int => booleano
-
-**Arvore de derivacao:**
-```
-        G |- e₁ : T    G |- e₂ : T
-        ────────────────────────────
-        G |- e1 < e2 : booleano
-```
-
-#### Deducao: `(CORPO)`
-
-**Tipo inferido:** `booleano`
-
-**Regra aplicada:** Expressao parentizada: G |- (e) : booleano
-
-**Arvore de derivacao:**
-```
-        (regra: Expressao parentizada: G |- (e) : booleano)
-        ────────────────────────────
-        G |- (CORPO) : booleano
-```
-
-
----
-
-### LINHA 16
-
-#### Deducao: `e1 < e2`
-
-**Tipo inferido:** `booleano`
-
-**Regra aplicada:** Operador relacional sintetiza booleano: G |- e1:int G |- e2:int => booleano
-
-**Arvore de derivacao:**
-```
-        G |- e₁ : T    G |- e₂ : T
-        ────────────────────────────
-        G |- e1 < e2 : booleano
-```
-
-#### Deducao: `(CORPO)`
-
-**Tipo inferido:** `booleano`
-
-**Regra aplicada:** Expressao parentizada: G |- (e) : booleano
-
-**Arvore de derivacao:**
-```
-        (regra: Expressao parentizada: G |- (e) : booleano)
-        ────────────────────────────
-        G |- (CORPO) : booleano
-```
-
-#### Deducao: `e1 + e2`
-
-**Tipo inferido:** `int`
-
-**Regra aplicada:** Operador aritmetico com promocao: G |- e1:int G |- e2:int => promover(int,int) = int
+**Regra aplicada:** Operador aritmetico com promocao: G |- e1:real G |- e2:real => promover(real,real) = real
 
 **Arvore de derivacao:**
 ```
         G |- e₁ : T₁    G |- e₂ : T₂
         ────────────────────────────
-        G |- e1 + e2 : int
+        G |- e1 - e2 : real
 ```
 
 #### Deducao: `(CORPO)`
 
-**Tipo inferido:** `int`
+**Tipo inferido:** `real`
 
-**Regra aplicada:** Expressao parentizada: G |- (e) : int
-
-**Arvore de derivacao:**
-```
-        (regra: Expressao parentizada: G |- (e) : int)
-        ────────────────────────────
-        G |- (CORPO) : int
-```
-
-#### Deducao: `(CORPO)`
-
-**Tipo inferido:** `booleano`
-
-**Regra aplicada:** Expressao parentizada: G |- (e) : booleano
+**Regra aplicada:** Expressao parentizada: G |- (e) : real
 
 **Arvore de derivacao:**
 ```
-        (regra: Expressao parentizada: G |- (e) : booleano)
+        (regra: Expressao parentizada: G |- (e) : real)
         ────────────────────────────
-        G |- (CORPO) : booleano
+        G |- (CORPO) : real
 ```
 
-#### Deducao: `IF encontrado`
+#### Deducao: `R := valor`
 
-**Tipo inferido:** `marker`
+**Tipo inferido:** `real`
 
-**Regra aplicada:** Marcador IF
+**Regra aplicada:** MEM sintetiza tipo: G[R |-> real] |- MEM : real
 
 **Arvore de derivacao:**
 ```
-        (regra: Marcador IF)
-        ────────────────────────────
-        G |- IF encontrado : marker
+        G |- valor : real
+        ─────────────────────────────────
+        G[R |-> real] |- MEM : real |- MEM : real
+```
+
+#### Deducao: `R := valor`
+
+**Tipo inferido:** `real`
+
+**Regra aplicada:** MEM sintetiza tipo: G[R |-> real] |- MEM : real
+
+**Arvore de derivacao:**
+```
+        G |- valor : real
+        ─────────────────────────────────
+        G[R |-> real] |- MEM : real |- MEM : real
 ```
 
 
@@ -1151,6 +936,6 @@ promover(T₁, T₂) = {
 
 ## ESTATISTICAS
 
-- **Total de deducoes:** 73
-- **Linhas analisadas:** 16
+- **Total de deducoes:** 58
+- **Linhas analisadas:** 12
 
