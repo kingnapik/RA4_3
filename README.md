@@ -1,124 +1,272 @@
-# RA3_2
-# Analisador Semântico - Fase 3
-## Informações Institucionais
-Instituição: Pontificia Universidade do Paraná (PUC-PR)
+# Compilador RPN para Assembly AVR
 
-Ano: 2025
-
-Disciplina: Linguagem Formal de Compiladores 
-
-Professor: Frank de Alcantara
-
-Desenvolvedor: Guilherme Knapik - kingnapik
-## Objetivo
-Implementação das Fases 1, 2 e 3: gramática LL(1), parser e análise semântica que anota a AST com tipos. A entrada lógica da Fase 3 é a AST da Fase 2, a gramática de atributos e a tabela de símbolos; a saída é a AST anotada ou erro semântico.
+**Grupo:** RA4_3
+**Integrante:** Guilherme Knapik (kingnapik)  
+**Disciplina:** Linguagens Formais e Compiladores
 
 ---
 
-## Estrutura da Linguagem
+## Descricao
 
-### Sintaxe Básica
+Compilador completo para uma linguagem baseada em Notacao Polonesa Reversa (RPN), gerando codigo Assembly para microcontroladores AVR (Arduino Uno - ATmega328P).
 
-A linguagem utiliza **notação polonesa reversa (RPN)**, onde operadores aparecem após seus operandos. Todas as expressões devem estar entre parênteses:
+O projeto integra as 4 fases de um compilador:
+1. **Analise Lexica** - Tokenizacao do codigo fonte
+2. **Analise Sintatica** - Parser LL(1) com construcao de arvore sintatica
+3. **Analise Semantica** - Verificacao de tipos e gramatica de atributos
+4. **Geracao de Codigo** - TAC, otimizacao e Assembly AVR
 
-```
-( operando1 operando2 operador )
-```
+---
 
-### Operadores Suportados
-
-#### Operadores Aritméticos
-- `+` : Adição
-- `-` : Subtração
-- `*` : Multiplicação
-- `/` : Divisão inteira (trunca para inteiro)
-- `|` : Divisão real (mantém casas decimais)
-- `%` : Resto da divisão inteira (apenas para inteiros)
-- `^` : Potenciação (expoente deve ser inteiro)
-
-#### Operadores de Comparação
-- `>` : Maior que
-- `<` : Menor que
-- `>=` : Maior ou igual
-- `<=` : Menor ou igual
-- `==` : Igual
-- `!=` : Diferente
-
-#### Comandos Especiais
-- `(N RES)` : Retorna o resultado da expressão N linhas anteriores
-- `(V MEM)` : Armazena o valor V na variável MEM
-- `(MEM)` : Retorna o valor armazenado em MEM (retorna 0 se não inicializada)
-
-### Estruturas de Controle
-
-#### IF - Tomada de Decisão
-
-**Sintaxe:**
-```
-( condição valor_verdadeiro valor_falso IF )
-```
-
-**Descrição:**
-- `condição`: Expressão que retorna 0 (falso) ou diferente de 0 (verdadeiro)
-- `valor_verdadeiro`: Valor retornado se condição for verdadeira
-- `valor_falso`: Valor retornado se condição for falsa
-
-#### FOR - Laço de Repetição
-
-**Sintaxe:**
-```
-( condição corpo FOR )
-```
-
-**Descrição:**
-- `condição`: Condição que define o numero de execuções.
-- `corpo`: Expressão a ser executada
-
-### Expressões Aninhadas
-
-Expressões podem ser aninhadas sem limite:
+## Estrutura do Projeto
 
 ```
-( ( 10 5 + ) ( 3 2 * ) - )              // (10+5) - (3*2) = 9
-( ( ( A B + ) ( C D * ) / ) X )         // Armazena (A+B)/(C*D) em X
+/
+├── main.cpp                 # Ponto de entrada do compilador
+├── leitor.cpp/.h            # Leitura de tokens do arquivo
+├── gramatica.cpp/.h         # Definicao da gramatica LL(1)
+├── parser.cpp/.h            # Parser LL(1)
+├── arvore.cpp/.h            # Arvore sintatica
+├── tabela_simbolos.cpp/.h   # Tabela de simbolos
+├── semantico.h              # Header do analisador semantico
+├── semantico_driver.cpp     # Driver do analisador semantico
+├── semantico_inferencia.cpp # Inferencia de tipos
+├── semantico_comandos.cpp   # Comandos MEM e RES
+├── semantico_saida.cpp      # Geracao de relatorios semanticos
+├── tac.cpp/.h               # Gerador de codigo TAC
+├── otimizador.cpp/.h        # Otimizador de TAC
+├── gerador_assembly.cpp/.h  # Orquestrador da geracao de Assembly
+├── asm_cabecalho.cpp        # Cabecalho e secoes de dados
+├── asm_setup.cpp            # Setup do Arduino
+├── asm_traducao.cpp         # Traducao TAC -> Assembly
+├── asm_saida.cpp            # Rotinas de saida (dump, fim)
+├── asm_serial.cpp           # Driver USART
+├── asm_float.cpp            # Rotinas IEEE 754 half-precision
+├── fatorial.txt             # Exemplo: calculo de fatorial
+├── fibonacci.txt            # Exemplo: sequencia de Fibonacci
+└── taylor.txt               # Exemplo: serie de Taylor para cosseno
 ```
 
 ---
 
-## Como compilar
-```bash
-.\compile_fase3.bat
-```
-ou diretamente por comando caso o arquivo de compilação esteja faltante.
-```bash
-g++ -std=c++17 -O2 -Wall \
-  main.cpp gramatica.cpp parser.cpp arvore.cpp leitor.cpp \
-  tabela_simbolos.cpp semantico_driver.cpp semantico_inferencia.cpp \
-  semantico_saida.cpp semantico_comandos.cpp \
-  -o AnalisadorCompleto
-```
-## Como executar
-```bash
-.\AnalisadorCompleto.exe teste1.txt
-```
-## Entrada
-Um artigo contendo o código-fonte da linguagem utilizada neste projeto (uma expressão RPN por linha) em formato .txt contendo apenas caracteres ASCII.
-- Cada linha do arquivo é um programa RPN completo, entre parênteses.
-- Tokens separados por espaço.
-- Suporta números (int/real), variáveis, operadores aritméticos/relacionais e construtos `IF`/`FOR` em RPN.
+## Compilacao
 
-Exemplo:
+### Windows (usando .bat)
+
+```bat
+@echo off
+g++ -o AnalisadorSintatico ^
+    main.cpp ^
+    gramatica.cpp ^
+    parser.cpp ^
+    arvore.cpp ^
+    leitor.cpp ^
+    tabela_simbolos.cpp ^
+    semantico_driver.cpp ^
+    semantico_inferencia.cpp ^
+    semantico_comandos.cpp ^
+    semantico_saida.cpp ^
+    tac.cpp ^
+    otimizador.cpp ^
+    gerador_assembly.cpp ^
+    asm_cabecalho.cpp ^
+    asm_setup.cpp ^
+    asm_traducao.cpp ^
+    asm_saida.cpp ^
+    asm_serial.cpp ^
+    asm_float.cpp
+
+if %errorlevel% equ 0 (
+    echo Compilacao OK
+) else (
+    echo Erro na compilacao
+)
+pause
 ```
-( 3.14 2.5 + )
-( 40 MEM )
-( ( MEM 40 == ) ( MEM 10 + ) ( MEM 10 - ) IF )
+
+### Linux/Mac
+
+```bash
+g++ -o AnalisadorSintatico \
+    main.cpp gramatica.cpp parser.cpp arvore.cpp leitor.cpp \
+    tabela_simbolos.cpp semantico_driver.cpp semantico_inferencia.cpp \
+    semantico_comandos.cpp semantico_saida.cpp tac.cpp otimizador.cpp \
+    gerador_assembly.cpp asm_cabecalho.cpp asm_setup.cpp \
+    asm_traducao.cpp asm_saida.cpp asm_serial.cpp asm_float.cpp
 ```
-## Saída
-- `analise_gramatica.md` — Relatório da gramática, FIRST/FOLLOW e tabela LL(1) usada pelo parser; inclui exemplos de derivação quando aplicável.
-- `gramatica_atributos.md` — Especificação das regras de atributos para a Fase 3 (tipagem, coerções, restrições de uso em `IF`, `FOR`, `MEM`, `RES`).
-- `erros_semanticos.md` — Lista de erros semânticos encontrados, com linha, mensagem e, quando disponível, contexto do nó/expressão.
-- `julgamento_tipos.md` — Resumo dos passos de tipagem aplicados por linha e por nó (quais regras determinaram cada tipo observado).
-- `arvore_atribuida_linha_N.md` — Visualização textual da AST anotada da linha N (nós com token, papel sintático e tipo anotado).
-- `arvore_atribuida_linha_N.json` — Estrutura JSON da AST anotada da linha N (campos: símbolo, filhos, tipoAnotado, metadados).
-- `arvores_atribuidas.json` — Consolidação JSON com todas as ASTs anotadas das linhas processadas.
-- `tabela_ll1.html` — Visualização da tabela LL(1) para consulta durante a correção.
+
+---
+
+## Execucao
+
+```bash
+.\AnalisadorSintatico <arquivo_entrada.txt>
+```
+
+**Exemplos:**
+```bash
+.\AnalisadorSintatico fatorial.txt
+.\AnalisadorSintatico fibonacci.txt
+.\AnalisadorSintatico taylor.txt
+```
+
+---
+
+## Arquivos Gerados
+
+### Fase 2 - Analise Sintatica
+| Arquivo | Descricao |
+|---------|-----------|
+| `analise_gramatica.md` | Gramatica, FIRST, FOLLOW, tabela LL(1) |
+| `tabela_ll1.html` | Tabela LL(1) em HTML |
+| `arvore_linha_N.html` | Arvore sintatica de cada linha |
+
+### Fase 3 - Analise Semantica
+| Arquivo | Descricao |
+|---------|-----------|
+| `gramatica_atributos.md` | Regras semanticas |
+| `erros_semanticos.md` | Erros encontrados |
+| `julgamento_tipos.md` | Inferencia de tipos |
+| `arvore_atribuida_linha_N.md` | Arvore com tipos anotados |
+| `arvore_atribuida_linha_N.json` | Arvore em JSON |
+| `arvores_atribuidas.json` | Todas as arvores consolidadas |
+
+### Fase 4 - Geracao de Codigo
+| Arquivo | Descricao |
+|---------|-----------|
+| `tac_completo_original.txt` | Codigo TAC antes da otimizacao |
+| `tac_final_otimizado.txt` | Codigo TAC apos otimizacao |
+| `relatorio_otimizacao.txt` | Log das otimizacoes |
+| `relatorio_otimizacoes.md` | Relatorio completo em Markdown |
+| `codigo.S` | Assembly AVR gerado |
+
+---
+
+## Linguagem RPN
+
+A linguagem utiliza Notacao Polonesa Reversa (pos-fixa), onde operadores aparecem apos seus operandos.
+
+### Sintaxe
+
+```
+( numero numero op )    # Expressao simples
+( valor VARIAVEL )      # Atribuicao (MEM)
+( N RES )               # Referencia a linha anterior
+( cond e1 e2 IF )       # Condicional
+( cond corpo FOR )      # Loop
+```
+
+### Operadores
+
+| Operador | Descricao |
+|----------|-----------|
+| `+` `-` `*` | Aritmeticos basicos |
+| `/` | Divisao inteira |
+| `\|` | Divisao real |
+| `%` | Modulo |
+| `^` | Potencia |
+| `>` `<` `>=` `<=` `==` `!=` | Relacionais |
+
+### Exemplo: Fatorial
+
+```
+( 1.0 N )
+( 8.0 L )
+( ( N L <= ) ( ( 1.0 F ) ( 1.0 K ) ( ( K N <= ) ( ( ( F K * ) F ) ( ( K 1.0 + ) K ) ) FOR ) ( ( N 1.0 + ) N ) ) FOR )
+```
+
+---
+
+## Otimizacoes Implementadas
+
+1. **Constant Folding** - Avalia expressoes constantes em tempo de compilacao
+2. **Algebraic Simplification** - Aplica identidades algebricas (x+0=x, x*1=x, etc)
+3. **Constant Propagation** - Propaga valores constantes conhecidos
+4. **Dead Code Elimination** - Remove codigo cujo resultado nao e usado
+5. **Redundant Jump Elimination** - Remove saltos desnecessarios
+
+---
+
+## Assembly AVR
+
+### Arquitetura Alvo
+- **MCU:** ATmega328P (Arduino Uno)
+- **Clock:** 16 MHz
+- **Ponto Flutuante:** IEEE 754 Half-Precision (16-bit)
+- **Comunicacao:** USART 9600 bps
+
+### Convencao de Registradores
+
+| Registrador | Uso |
+|-------------|-----|
+| R0-R1 | Resultado MUL |
+| R16 (temp) | Temporario 1 |
+| R17 (temp2) | Temporario 2 |
+| R18-R21 | Calculos intermediarios |
+| R22-R23 | Operando 2 |
+| R24-R25 | Operando 1 / Resultado |
+| R26-R27 (X) | Ponteiro |
+| R28 | Auxiliar |
+| R30-R31 (Z) | Ponteiro Flash |
+
+### Rotinas IEEE 754
+
+| Rotina | Operacao |
+|--------|----------|
+| `__addhf3` | Adicao |
+| `__subhf3` | Subtracao |
+| `__mulhf3` | Multiplicacao |
+| `__divhf3` | Divisao |
+| `__cmphf2` | Comparacao |
+| `__powhf3` | Potencia |
+
+---
+
+## Compilacao para Arduino
+
+### Usando Platform.io com VSCode
+
+1. **Estrutura do projeto**
+
+   Certifique-se de que o projeto está organizado em formato PlatformIO, com pelo menos:
+
+   - Um arquivo `platformio.ini` na raiz do projeto, por exemplo:
+     ```ini
+     [env:uno]
+     platform = atmelavr
+     board = uno
+     framework = arduino
+     ```
+   - O arquivo de assembly `codigo.S` dentro da pasta `src/`:
+     ```
+     src/
+       codigo.S
+     ```
+
+2. **Compilar o código**
+
+   No terminal do VS Code (ou terminal do sistema dentro da pasta do projeto), execute:
+
+   ```bash
+   pio run
+
+---
+
+## Validacao
+
+Conecte ao Arduino via serial (9600 bps) para ver os resultados:
+
+```bash
+
+# Windows
+# Use o Serial Monitor do Arduino IDE
+```
+
+A saida mostra os valores das variaveis em hexadecimal (formato half-precision):
+
+```
+N = 0x4800
+L = 0x4800
+F = 0x6320
+K = 0x4900
+```
